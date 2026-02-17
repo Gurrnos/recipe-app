@@ -10,5 +10,6 @@ DB_PASSWORD=(your db password here)
 DATABASE=(your database here)  
 
 Create a virtual environment and install the required pip packages, details below.  
-python -m venv ./venv - Create a virtual environment  
-pip install mysql-connector-python python-dotenv - Install the required packages  
+__Create a virtual environment:__ python -m venv ./venv  
+__Install the required packages:__ pip install mysql-connector-python python-dotenv  
+__Run the program:__ python main.py  
