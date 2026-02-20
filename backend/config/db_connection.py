@@ -5,7 +5,7 @@ import os
 
 load_dotenv()
 
-def connect_db():
+def get_db():
 
     try:
         config = {
@@ -20,6 +20,8 @@ def connect_db():
         cnx = mysql.connector.connect(**config)
 
         print(f"Connection made to user: {config['user']} on port: {config['port']} with db: {config['database']}")
+
+        return cnx
     
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -31,5 +33,4 @@ def connect_db():
         else:
             print(err)
 
-    else:
-        cnx.close()
+        return None
