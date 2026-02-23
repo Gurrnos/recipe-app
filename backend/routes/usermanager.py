@@ -28,6 +28,7 @@ class SignupItem(BaseModel):
 def signup(data: SignupItem, response: Response):
     try:
         if len(data.password) > 50:
+            response.status_code = status.HTTP_403_FORBIDDEN
             return {'message': "Password exceeding character limit"}
 
         hashed_password = hashPassword(data.password.encode("utf-8"))
@@ -47,6 +48,7 @@ def signup(data: SignupItem, response: Response):
                 'uid': uid, 
                 'username': data.username, 
                 'email': data.email, 
+                'exp': datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(hours = 4)
         }
 
         token = jwt.encode(payload, key, algorithm="HS256")
@@ -94,6 +96,7 @@ def login(data: LoginItem, response: Response):
                 'uid': user['uid'], 
                 'username': user['username'], 
                 'email': user['email'], 
+                'exp': datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(hours = 4)
         }
 
         token = jwt.encode(payload, key, algorithm="HS256")
