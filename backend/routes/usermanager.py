@@ -24,7 +24,7 @@ class SignupItem(BaseModel):
     email: str
     password: str
 
-@router.post("/signup", tags=["users"], status_code = 201)
+@router.post("/api/signup", tags=["users"], status_code = 201)
 def signup(data: SignupItem, response: Response):
     try:
         if len(data.password) > 50:
@@ -73,7 +73,7 @@ class LoginItem(BaseModel):
     email: str
     password: str
 
-@router.post("/login", tags=["users"], status_code = 200)
+@router.post("/api/login", tags=["users"], status_code = 200)
 def login(data: LoginItem, response: Response):
     try:
         statement = '''SELECT * FROM users WHERE email = %s'''
@@ -114,7 +114,7 @@ class UpdateData (BaseModel):
     old_passw: str
     new_passw: str
 
-@router.put("/changePassw", status_code = 200)
+@router.put("/api/changePassw", status_code = 200)
 def chance_password(data: UpdateData, response: Response, token: Annotated[str | None, Cookie()]):
     try:
         user = authenticate(token)
@@ -159,7 +159,7 @@ def chance_password(data: UpdateData, response: Response, token: Annotated[str |
 class UsernameItem (BaseModel):
     new_username: str
 
-@router.put("/changeUsername", status_code = 200)
+@router.put("/api/changeUsername", status_code = 200)
 def change_username(data: UsernameItem, response: Response, token: Annotated[str | None, Cookie()]):
     try:
         user = authenticate(token)
@@ -187,7 +187,7 @@ def change_username(data: UsernameItem, response: Response, token: Annotated[str
         return {'message': "Internal server error"}
     
 
-@router.delete("/deleteAccount", status_code = 200)
+@router.delete("/api/deleteAccount", status_code = 200)
 def delete_account(response: Response, token: Annotated[str | None, Cookie()]):
     try:
         user = authenticate(token)
