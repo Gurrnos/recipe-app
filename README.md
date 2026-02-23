@@ -17,3 +17,6 @@ Create a virtual environment and install the required pip packages, details belo
 <ins>Activate the venv:</ins> venv/Scripts/activate  
 <ins>Install the required packages:</ins> pip install mysql-connector-python python-dotenv "fastapi[standard]" bcrypt pyjwt  
 <ins>Run the program:</ins> python main.py  
+  
+
+# Changelog
