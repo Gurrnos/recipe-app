@@ -1,4 +1,3 @@
-
 import config.fastapiconfig as apicfg
 import config.db_connection as dbconn
 import signal
@@ -7,17 +6,22 @@ import sys
 import subprocess
 from fastapi import FastAPI
 import routes.usermanager as usermanager
+import routes.recipemanager as recipemanager
 
 
 app = apicfg.create_configured_app()
+
 
 @app.get("/")
 def read_root():
     return {"Hello": "World"}
 
+
 app.include_router(usermanager.router)
+app.include_router(recipemanager.router)
 
 if __name__ == "__main__":
-    subprocess.run([sys.executable, "-m", "fastapi", "dev", "main.py", "--port", "3000"])
-    #os.kill(os.getpid(),signal.SIGINT)
-    
+    subprocess.run(
+        [sys.executable, "-m", "fastapi", "dev", "main.py", "--port", "3000"]
+    )
+    # os.kill(os.getpid(),signal.SIGINT)
