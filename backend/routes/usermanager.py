@@ -1,13 +1,23 @@
 from pydantic import BaseModel
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Response, status, Cookie
 from config.db_connection import get_db
 import mysql.connector
 from mysql.connector import errorcode
 from services.password import hashPassword, checkPassword
+import jwt
+import os
+from dotenv import load_dotenv
+from services.auth import authenticate
+from typing import Annotated
+from datetime import timezone
+import time, datetime
 
+load_dotenv()
 router = APIRouter()
 db = get_db()
 cursor = db.cursor(dictionary=True)
+key = os.getenv("JWT_SECRET")
+
 
 class SignupItem(BaseModel):
     username: str
@@ -27,10 +37,22 @@ def signup(data: SignupItem, response: Response):
         values = data.username, data.email, hashed_password
 
         cursor.execute(statement, values)
+        uid = cursor.lastrowid
 
         db.commit()
 
         response.status_code = status.HTTP_201_CREATED
+
+        payload = {
+                'uid': uid, 
+                'username': data.username, 
+                'email': data.email, 
+        }
+
+        token = jwt.encode(payload, key, algorithm="HS256")
+        print(token)
+        #response.set_cookie(key='token', value=token, max_age = 3600 * 4)
+
         return {"message": f"User {data.username} created successfully"}
 
     except mysql.connector.Error as err:
@@ -44,7 +66,6 @@ def signup(data: SignupItem, response: Response):
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
             return {"message": "Internal server error"}
         
-#TODO: FIX TOKEN FOR LOGIN AND CHANGE PASSWORD!!!
 
 class LoginItem(BaseModel):
     email: str
@@ -68,9 +89,17 @@ def login(data: LoginItem, response: Response):
             return {'message': "Invalid email or password"}
         
         response.status_code = status.HTTP_200_OK
-        return {'message': f"Successfully logged in as {user['username']}"}
-    
 
+        payload = {
+                'uid': user['uid'], 
+                'username': user['username'], 
+                'email': user['email'], 
+        }
+
+        token = jwt.encode(payload, key, algorithm="HS256")
+        print(token)
+        #response.set_cookie(key='token', value=token, max_age = 3600 * 4)
+        return {'message': f"Successfully logged in as {user['username']}"}
 
     except mysql.connector.Error as err:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -82,10 +111,16 @@ class UpdateData (BaseModel):
     old_passw: str
     new_passw: str
 
-@router.put("/changePassw")
-def chance_password(data: UpdateData, response: Response, status_code = 200):
+@router.put("/changePassw", status_code = 200)
+def chance_password(data: UpdateData, response: Response, token: Annotated[str | None, Cookie()]):
     try:
-        uid = 'get uid from token'
+        user = authenticate(token)
+
+        if user is False:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {'message': "Invalid token"}
+
+        uid = user['uid']
 
         values = [uid]
         statement = '''SELECT * from users WHERE uid = %s'''
@@ -108,6 +143,7 @@ def chance_password(data: UpdateData, response: Response, status_code = 200):
         cursor.execute(update_statement, new_values)
         db.commit()
 
+        response.status_code = status.HTTP_202_ACCEPTED
         return {'message': 'Successfully updated password'}
     
     except mysql.connector.Error as err:
@@ -117,11 +153,47 @@ def chance_password(data: UpdateData, response: Response, status_code = 200):
         return {'message': "Internal server error"}
 
 
+class UsernameItem (BaseModel):
+    new_username: str
+
+@router.put("/changeUsername", status_code = 200)
+def change_username(data: UsernameItem, response: Response, token: Annotated[str | None, Cookie()]):
+    try:
+        user = authenticate(token)
+
+        if user is False:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {'message': "Invalid token"}
+
+        uid = user['uid']
+
+        values = [data.new_username, uid]
+        statement = '''UPDATE users SET username = %s WHERE uid = %s'''
+
+        cursor.execute(statement, values)
+        db.commit()
+        
+        response.status_code = status.HTTP_202_ACCEPTED
+        return {'message': "Successfully updated username"}
+
+    except mysql.connector.Error as err:
+        db.rollback()
+        print(f"Error: {err}")
+
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {'message': "Internal server error"}
+    
 
 @router.delete("/deleteAccount", status_code = 200)
-def delete_account(response: Response):
+def delete_account(response: Response, token: Annotated[str | None, Cookie()]):
     try:
-        uid = 'get uid from token'
+        user = authenticate(token)
+
+        if user is False:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {'message': "Invalid token"}
+
+        uid = user['uid']
 
         values = [uid]
         statement = '''DELETE FROM users WHERE uid = %s'''
@@ -135,8 +207,6 @@ def delete_account(response: Response):
         else:
             response.status_code = status.HTTP_200_OK
             return {'message': 'Successfully deleted account'}
-
-
 
     except mysql.connector.Error as err:
         db.rollback()

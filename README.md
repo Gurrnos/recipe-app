@@ -8,8 +8,12 @@ DB_HOST=(your db host here)
 DB_PORT=(your db port here)  
 DB_PASSWORD=(your db password here)  
 DATABASE=(your database here)  
+   
+JWT_SECRET=(your secret token here)  
+  
 
 Create a virtual environment and install the required pip packages, details below.  
 <ins>Create a virtual environment:</ins> python -m venv ./venv  
-<ins>Install the required packages:</ins> pip install mysql-connector-python python-dotenv  
+<ins>Activate the venv:</ins> venv/Scripts/activate  
+<ins>Install the required packages:</ins> pip install mysql-connector-python python-dotenv
 <ins>Run the program:</ins> python main.py  
