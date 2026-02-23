@@ -4,8 +4,9 @@ import os
 from dotenv import load_dotenv
 
 db = get_db()
-cursor = db.cursor(dictionary = True)
+cursor = db.cursor(dictionary=True)
 load_dotenv()
+
 
 def authenticate(cookie):
     print(cookie)
@@ -15,9 +16,10 @@ def authenticate(cookie):
 
     try:
         user = jwt.decode(cookie, os.getenv("JWT_SECRET"), algorithms="HS256")
+        print(user)
 
         return user
-    
+
     except Exception as e:
         print(f"Decoding error: {e}")
         return False
