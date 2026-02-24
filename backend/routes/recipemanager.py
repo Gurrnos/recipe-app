@@ -23,8 +23,8 @@ class CreateRecipe(BaseModel):
     recipename: str
     description: str
     ispublic: int
-    steps: list
     ingredients: list
+    steps: list
 
 
 @router.post("/api/createRecipe", tags=["recipes"], status_code=201)
@@ -32,6 +32,7 @@ def createRecipe(
     data: CreateRecipe, response: Response, token: Annotated[str | None, Cookie()]
 ):
     try:
+        print(data.ingredients)
         user = authenticate(token)
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
@@ -44,7 +45,20 @@ def createRecipe(
         statement = """INSERT INTO recipes (recipename, description, ispublic, uid) VALUES (%s, %s, %s, %s)"""
 
         cursor.execute(statement, values)
+
         rid = cursor.lastrowid
+
+        for ingredient in data.ingredients:
+            values = [rid, ingredient["name"], ingredient["amount"], ingredient["type"]]
+            ingredient_statement = "INSERT INTO ingredients (rid, name, amount, type) VALUES(%s, %s, %s, %s)"
+            cursor.execute(ingredient_statement, values)
+
+        for i, step in enumerate(data.steps):
+            step_statement = (
+                """INSERT INTO steps (rid, stepNr, description) VALUES (%s, %s, %s)"""
+            )
+            values = [rid, i + 1, step]
+            cursor.execute(step_statement, values)
 
         db.commit()
         response.status_code = status.HTTP_201_CREATED
