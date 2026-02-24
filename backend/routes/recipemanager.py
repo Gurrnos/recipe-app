@@ -23,6 +23,7 @@ class CreateRecipe(BaseModel):
     recipename: str
     description: str
     ispublic: int
+    steps: list
 
 
 @router.post("/api/createRecipe", tags=["recipes"], status_code=201)
@@ -42,6 +43,7 @@ def createRecipe(
         statement = """INSERT INTO recipes (recipename, description, ispublic, uid) VALUES (%s, %s, %s, %s)"""
 
         cursor.execute(statement, values)
+        rid = cursor.lastrowid
 
         db.commit()
         response.status_code = status.HTTP_201_CREATED
