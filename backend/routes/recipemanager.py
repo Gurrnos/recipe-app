@@ -5,6 +5,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from services.password import hashPassword, checkPassword
 import jwt
+import json
 import os
 from dotenv import load_dotenv
 from services.auth import authenticate
@@ -17,6 +18,34 @@ router = APIRouter()
 db = get_db()
 cursor = db.cursor(dictionary=True)
 key = os.getenv("JWT_SECRET")
+
+
+def insert_steps(rid, data):
+    try:
+        for i, step in enumerate(data):
+            step_statement = (
+                """INSERT INTO steps (rid, stepNr, description) VALUES (%s, %s, %s)"""
+            )
+            values = [rid, i + 1, step]
+            cursor.execute(step_statement, values)
+
+    except mysql.connector.Error as err:
+        db.rollback()
+        print(f"Error: {err}")
+        raise mysql.connector.Error
+
+
+def insert_ingredients(rid, data):
+    try:
+        for ingredient in data:
+            values = [rid, ingredient["name"], ingredient["amount"], ingredient["type"]]
+            ingredient_statement = "INSERT INTO ingredients (rid, name, amount, type) VALUES(%s, %s, %s, %s)"
+            cursor.execute(ingredient_statement, values)
+
+    except mysql.connector.Error as err:
+        db.rollback()
+        print(f"Error: {err}")
+        raise mysql.connector.Error
 
 
 class CreateRecipe(BaseModel):
@@ -48,17 +77,8 @@ def createRecipe(
 
         rid = cursor.lastrowid
 
-        for ingredient in data.ingredients:
-            values = [rid, ingredient["name"], ingredient["amount"], ingredient["type"]]
-            ingredient_statement = "INSERT INTO ingredients (rid, name, amount, type) VALUES(%s, %s, %s, %s)"
-            cursor.execute(ingredient_statement, values)
-
-        for i, step in enumerate(data.steps):
-            step_statement = (
-                """INSERT INTO steps (rid, stepNr, description) VALUES (%s, %s, %s)"""
-            )
-            values = [rid, i + 1, step]
-            cursor.execute(step_statement, values)
+        insert_steps(rid, data.steps)
+        insert_ingredients(rid, data.ingredients)
 
         db.commit()
         response.status_code = status.HTTP_201_CREATED
@@ -97,6 +117,39 @@ def delete_recipe(response: Response, token: Annotated[str | None, Cookie()]):
         else:
             response.status_code = status.HTTP_200_OK
             return {"message": "Successfully deleted recipe"}
+
+    except mysql.connector.Error as err:
+        db.rollback()
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {"message": "Internal server error"}
+
+
+@router.put("/api/editRecipe", status_code=200)
+def edit_recipe(
+    data: CreateRecipe, response: Response, token: Annotated[str | None, Cookie()]
+):
+    try:
+        user = authenticate(token)
+        if user is False:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {"message": "Invalid token"}
+        uid = user["uid"]
+        rid = 18  # TODO HARDBAKED VALUE CHANGE WHEN UI IMPLEMENTED FETCH CORRECT RECIPE ID
+
+        update_recipe = """UPDATE recipes SET recipename = %s, description = %s, ispublic = %s WHERE rid = %s"""
+        update_values = [data.recipename, data.description, data.ispublic, rid]
+        cursor.execute(update_recipe, update_values)
+
+        delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
+        cursor.execute(delete_sub_statment, [rid])
+
+        insert_ingredients(rid, data.ingredients)
+        insert_steps(rid, data.steps)
+
+        db.commit()
+        response.status_code = status.HTTP_202_ACCEPTED
+        return {"message": "Successfully updated recipe"}
 
     except mysql.connector.Error as err:
         db.rollback()
