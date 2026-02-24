@@ -134,7 +134,7 @@ def edit_recipe(
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
             return {"message": "Invalid token"}
-        uid = user["uid"]
+
         rid = 18  # TODO HARDBAKED VALUE CHANGE WHEN UI IMPLEMENTED FETCH CORRECT RECIPE ID
 
         update_recipe = """UPDATE recipes SET recipename = %s, description = %s, ispublic = %s WHERE rid = %s"""
