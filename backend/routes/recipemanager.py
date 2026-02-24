@@ -24,6 +24,7 @@ class CreateRecipe(BaseModel):
     description: str
     ispublic: int
     steps: list
+    ingredients: list
 
 
 @router.post("/api/createRecipe", tags=["recipes"], status_code=201)
