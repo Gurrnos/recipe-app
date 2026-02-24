@@ -81,11 +81,14 @@ def delete_recipe(response: Response, token: Annotated[str | None, Cookie()]):
             return {"message": "Invalid token"}
 
         uid = user["uid"]
-        rid = 5  # TODO HARDBAKED VALUE CHANGE WHEN UI IMPLEMENTED
+        rid = 14  # TODO HARDBAKED VALUE CHANGE WHEN UI IMPLEMENTED
         Values = [rid, uid]
-        statement = """DELETE FROM recipes WHERE rid = %s AND uid = %s"""
 
-        cursor.execute(statement, Values)
+        delete_recipe_statement = """DELETE FROM recipes WHERE rid = %s AND uid = %s"""
+        delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
+
+        cursor.execute(delete_sub_statment, [rid])
+        cursor.execute(delete_recipe_statement, Values)
         db.commit()
 
         if cursor.rowcount == 0:
