@@ -97,9 +97,19 @@ def recipe_formatter(recipe):
     ingredient_list = []
     step_list = []
 
+    seen_ingredients = []
+    seen_steps = []
+
     for data in recipe:
-        ingredient_list.append({'name': data['name'], 'amount': data['amount'], 'type': data['type']})
-        step_list.append(data['step_desc'])
+        if data['name'] not in seen_ingredients:
+            ingredient_list.append({'name': data['name'], 'amount': data['amount'], 'type': data['type']})
+        
+            seen_ingredients.append(data['name'])
+
+        if data['step_desc'] not in seen_steps:
+            step_list.append(data['step_desc'])
+
+            seen_steps.append(data['step_desc'])
 
     recipe_data = {
         'rid': recipe[0]['rid'],
@@ -110,6 +120,8 @@ def recipe_formatter(recipe):
     }
 
     print(f"post formatted: {recipe_data}")
+
+    return recipe_data
 
 
 
@@ -128,10 +140,10 @@ def get_detailed_recipe(response: Response, rid: int):
         result = cursor.fetchall()
         print(f"pre formatted: {result}")
 
-        recipe_formatter(result)
+        formatted = recipe_formatter(result)
 
         response.status_code = status.HTTP_200_OK
-        return {'message': 'insert data here'}
+        return {'message': f"data: {formatted}"}
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
