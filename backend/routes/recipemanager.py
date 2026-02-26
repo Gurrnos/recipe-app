@@ -92,6 +92,52 @@ def createRecipe(
         return {"message": "Internal server error"}
 
 
+def recipe_formatter(recipe):
+
+    ingredient_list = []
+    step_list = []
+
+    for data in recipe:
+        ingredient_list.append({'name': data['name'], 'amount': data['amount'], 'type': data['type']})
+        step_list.append(data['step_desc'])
+
+    recipe_data = {
+        'rid': recipe[0]['rid'],
+        'recipename': recipe[0]['recipename'], 
+        'description': recipe[0]['recipe_desc'],
+        'ingredients': ingredient_list,
+        'steps': step_list
+    }
+
+    print(f"post formatted: {recipe_data}")
+
+
+
+@router.get("/api/getRecipeDetailed/", status_code = 200)
+def get_detailed_recipe(response: Response, rid: int):
+    try:
+        statement = '''
+            SELECT DISTINCT r.rid, r.recipename, r.description as recipe_desc, 
+            i.name, i.amount, i.type, s.stepNr, s.description as step_desc FROM recipes r 
+            INNER JOIN ingredients i ON r.rid = i.rid 
+            INNER JOIN steps s ON r.rid = s.rid WHERE r.rid = %s
+        '''
+
+        cursor.execute(statement, [rid])
+
+        result = cursor.fetchall()
+        print(f"pre formatted: {result}")
+
+        recipe_formatter(result)
+
+        response.status_code = status.HTTP_200_OK
+        return {'message': 'insert data here'}
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {'message': "Internal server error"}
+
 @router.delete("/api/deleteRecipe", status_code=200)
 def delete_recipe(response: Response, token: Annotated[str | None, Cookie()]):
     try:
