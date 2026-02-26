@@ -25,7 +25,7 @@ class Favorite(BaseModel):
     rid: int
 
 
-@router.post("/api/users/toggleFavorite", status_code=201)
+@router.post("/api/users/toggleFavorite/", status_code=201)
 def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
     try:
         user = authenticate(token)

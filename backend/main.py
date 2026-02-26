@@ -7,6 +7,7 @@ import subprocess
 from fastapi import FastAPI
 import routes.usermanager as usermanager
 import routes.recipemanager as recipemanager
+import routes.favoritemanager as favoritemanager
 
 
 app = apicfg.create_configured_app()
@@ -19,6 +20,7 @@ def read_root():
 
 app.include_router(usermanager.router)
 app.include_router(recipemanager.router)
+app.include_router(favoritemanager.router)
 
 if __name__ == "__main__":
     subprocess.run(
