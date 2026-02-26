@@ -120,7 +120,21 @@ def recipe_formatter(recipe):
 
     return recipe_data
 
+@router.get("/api/getRecipes", status_code = 200)
+def get_recipes(response: Response):
+    try:
+        statement = '''SELECT rid, recipename, description FROM recipes'''
+        cursor.execute(statement)
 
+        result = cursor.fetchall()
+
+        response.status_code = status.HTTP_200_OK
+        return {'message': f"data: {result}"}
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {'message': "Internal server error"}
 
 @router.get("/api/getRecipeDetailed/", status_code = 200)
 def get_detailed_recipe(response: Response, rid: int):
