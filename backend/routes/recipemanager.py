@@ -106,10 +106,10 @@ def recipe_formatter(recipe):
         
             seen_ingredients.append(data['name'])
 
-        if data['step_desc'] not in seen_steps:
-            step_list.append(data['step_desc'])
+        if data['stepNr'] not in seen_steps:
+            step_list.append({'stepNr': data['stepNr'], 'description': data['step_desc']})
 
-            seen_steps.append(data['step_desc'])
+            seen_steps.append(data['stepNr'])
 
     recipe_data = {
         'rid': recipe[0]['rid'],
