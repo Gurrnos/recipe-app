@@ -61,7 +61,6 @@ def createRecipe(
     data: CreateRecipe, response: Response, token: Annotated[str | None, Cookie()]
 ):
     try:
-        print(data.ingredients)
         user = authenticate(token)
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
@@ -119,8 +118,6 @@ def recipe_formatter(recipe):
         'steps': step_list
     }
 
-    print(f"post formatted: {recipe_data}")
-
     return recipe_data
 
 
@@ -138,7 +135,6 @@ def get_detailed_recipe(response: Response, rid: int):
         cursor.execute(statement, [rid])
 
         result = cursor.fetchall()
-        print(f"pre formatted: {result}")
 
         formatted = recipe_formatter(result)
 
