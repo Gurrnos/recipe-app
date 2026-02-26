@@ -90,6 +90,32 @@ def createRecipe(
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
 
+class FilterItem(BaseModel):
+    recipename: str
+    ingredients: list
+    exclude_own: bool
+
+@router.get("/api/getRecipes", status_code = 200)
+def get_recipes(data: FilterItem, response: Response, token = Annotated[str | None, Cookie()]):
+    try:
+        statement = ''''''
+        values = []
+
+        if len(data.ingredients) < 1 and data.exclude_own is False:
+            statement = '''SELECT rid, recipename, description FROM recipes WHERE recipename LIKE %s'''
+            values = [f"%{data.recipename}%"]
+            
+        cursor.execute(statement, values)
+
+        result = cursor.fetchall()
+
+        response.status_code = status.HTTP_200_OK
+        return {'message': f"data: {result}"}
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {'message': "Internal server error"}
 
 def recipe_formatter(recipe):
 
@@ -120,21 +146,6 @@ def recipe_formatter(recipe):
 
     return recipe_data
 
-@router.get("/api/getRecipes", status_code = 200)
-def get_recipes(response: Response):
-    try:
-        statement = '''SELECT rid, recipename, description FROM recipes'''
-        cursor.execute(statement)
-
-        result = cursor.fetchall()
-
-        response.status_code = status.HTTP_200_OK
-        return {'message': f"data: {result}"}
-
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {'message': "Internal server error"}
 
 @router.get("/api/getRecipeDetailed/", status_code = 200)
 def get_detailed_recipe(response: Response, rid: int):
@@ -159,6 +170,8 @@ def get_detailed_recipe(response: Response, rid: int):
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': "Internal server error"}
+    
+
 
 @router.delete("/api/deleteRecipe", status_code=200)
 def delete_recipe(response: Response, token: Annotated[str | None, Cookie()]):
