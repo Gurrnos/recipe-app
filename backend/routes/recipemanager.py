@@ -89,6 +89,21 @@ def createRecipe(
         print(f"error{err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
+    
+def get_rids(ingredients):
+    ingredient_map = ', '.join(["%s"] * len(ingredients))
+    r_ids = f'''SELECT rid FROM ingredients WHERE name IN ({ingredient_map})'''
+
+
+    cursor.execute(r_ids, ingredients)
+    result = cursor.fetchall()
+
+    rid_data = []
+    for rid in result:
+        rid_data.append(int(rid['rid']))
+    
+    return rid_data
+    
 
 class FilterItem(BaseModel):
     recipename: str
@@ -96,14 +111,56 @@ class FilterItem(BaseModel):
     exclude_own: bool
 
 @router.get("/api/getRecipes", status_code = 200)
-def get_recipes(data: FilterItem, response: Response, token = Annotated[str | None, Cookie()]):
+def get_recipes(data: FilterItem, response: Response, token: Annotated[str | None, Cookie()] = None):
     try:
         statement = ''''''
         values = []
 
         if len(data.ingredients) < 1 and data.exclude_own is False:
-            statement = '''SELECT rid, recipename, description FROM recipes WHERE recipename LIKE %s'''
+            statement = '''SELECT rid, recipename, description, uid FROM recipes WHERE recipename LIKE %s'''
             values = [f"%{data.recipename}%"]
+        
+        elif len(data.ingredients) < 1 and data.exclude_own is True:
+            user = authenticate(token)
+
+            if user is False:
+                response.status_code = status.HTTP_403_FORBIDDEN
+                return {'message': "Invalid token"}
+
+            uid = user['uid']
+
+            statement = '''SELECT rid, recipename, description, uid FROM recipes WHERE uid != %s AND recipename LIKE %s'''
+            values = [uid, f"%{data.recipename}%"]
+
+        elif len(data.ingredients) > 0 and data.exclude_own is False:
+            param_data = get_rids(data.ingredients)
+            rids = ', '.join(["%s"] * len(param_data))
+
+            statement = f'''SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids})
+            AND recipename LIKE %s
+            '''
+            param_data.append(f"%{data.recipename}%")
+            values = param_data
+
+        elif len(data.ingredients) > 0 and data.exclude_own is True:
+            user = authenticate(token)
+
+            if user is False:
+                response.status_code = status.HTTP_403_FORBIDDEN
+                return {'message': "Invalid token"}
+
+            uid = user['uid']
+            
+            param_data = get_rids(data.ingredients)
+            rids = ', '.join(["%s"] * len(param_data))
+
+            statement = f'''SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids}) 
+            AND uid != %s AND recipename LIKE %s
+            '''
+            param_data.append(uid)
+            param_data.append(f"%{data.recipename}%")
+            values = param_data
+
             
         cursor.execute(statement, values)
 
@@ -172,9 +229,38 @@ def get_detailed_recipe(response: Response, rid: int):
         return {'message': "Internal server error"}
     
 
+@router.put("/api/editRecipe/", status_code=200)
+def edit_recipe(
+    data: CreateRecipe, response: Response, rid: int, token: Annotated[str | None, Cookie()]
+):
+    try:
+        user = authenticate(token)
+        if user is False:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {"message": "Invalid token"}
 
-@router.delete("/api/deleteRecipe", status_code=200)
-def delete_recipe(response: Response, token: Annotated[str | None, Cookie()]):
+        update_recipe = """UPDATE recipes SET recipename = %s, description = %s, ispublic = %s WHERE rid = %s"""
+        update_values = [data.recipename, data.description, data.ispublic, rid]
+        cursor.execute(update_recipe, update_values)
+
+        delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
+        cursor.execute(delete_sub_statment, [rid])
+
+        insert_ingredients(rid, data.ingredients)
+        insert_steps(rid, data.steps)
+
+        db.commit()
+        response.status_code = status.HTTP_202_ACCEPTED
+        return {"message": "Successfully updated recipe"}
+
+    except mysql.connector.Error as err:
+        db.rollback()
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {"message": "Internal server error"}
+
+@router.delete("/api/deleteRecipe/", status_code=200)
+def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
     try:
         user = authenticate(token)
         if user is False:
@@ -182,7 +268,7 @@ def delete_recipe(response: Response, token: Annotated[str | None, Cookie()]):
             return {"message": "Invalid token"}
 
         uid = user["uid"]
-        rid = 14  # TODO HARDBAKED VALUE CHANGE WHEN UI IMPLEMENTED
+
         Values = [rid, uid]
 
         delete_recipe_statement = """DELETE FROM recipes WHERE rid = %s AND uid = %s"""
@@ -205,35 +291,3 @@ def delete_recipe(response: Response, token: Annotated[str | None, Cookie()]):
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
 
-
-@router.put("/api/editRecipe", status_code=200)
-def edit_recipe(
-    data: CreateRecipe, response: Response, token: Annotated[str | None, Cookie()]
-):
-    try:
-        user = authenticate(token)
-        if user is False:
-            response.status_code = status.HTTP_403_FORBIDDEN
-            return {"message": "Invalid token"}
-
-        rid = 18  # TODO HARDBAKED VALUE CHANGE WHEN UI IMPLEMENTED FETCH CORRECT RECIPE ID
-
-        update_recipe = """UPDATE recipes SET recipename = %s, description = %s, ispublic = %s WHERE rid = %s"""
-        update_values = [data.recipename, data.description, data.ispublic, rid]
-        cursor.execute(update_recipe, update_values)
-
-        delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
-        cursor.execute(delete_sub_statment, [rid])
-
-        insert_ingredients(rid, data.ingredients)
-        insert_steps(rid, data.steps)
-
-        db.commit()
-        response.status_code = status.HTTP_202_ACCEPTED
-        return {"message": "Successfully updated recipe"}
-
-    except mysql.connector.Error as err:
-        db.rollback()
-        print(f"Error: {err}")
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {"message": "Internal server error"}
