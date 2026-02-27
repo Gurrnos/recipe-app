@@ -238,6 +238,23 @@ def get_detailed_recipe(response: Response, rid: int):
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': "Internal server error"}
     
+@router.get("/api/getTopRecepies", status_code = 200)
+def get_top_recepies(response: Response):
+    try:
+        statement = '''
+        SELECT f.rid, r.recipename, r.description, COUNT(f.rid) AS favoriteCount FROM favorites f 
+        JOIN recipes r ON f.rid = r.rid GROUP BY f.rid ORDER BY favoriteCount desc LIMIT 10
+        '''
+
+        cursor.execute(statement)
+        result = cursor.fetchall()
+
+        return {'message': result}
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {'message': "Internal server error"}
 
 @router.put("/api/editRecipe/", status_code=200)
 def edit_recipe(
