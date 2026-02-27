@@ -63,7 +63,7 @@ def get_favorites(response: Response, token: Annotated[str | None, Cookie()]):
 
         statement = '''
             SELECT f.rid, r.recipename, r.description FROM favorites f 
-            LEFT JOIN recipes r ON f.rid = r.rid WHERE f.uid = %s;
+            JOIN recipes r ON f.rid = r.rid WHERE f.uid = %s;
         '''
         
         cursor.execute(statement, [uid])
