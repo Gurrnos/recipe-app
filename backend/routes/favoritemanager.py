@@ -19,12 +19,6 @@ db = get_db()
 cursor = db.cursor(dictionary=True)
 key = os.getenv("JWT_SECRET")
 
-
-class Favorite(BaseModel):
-    uid: int
-    rid: int
-
-
 @router.post("/api/users/toggleFavorite/", status_code=201)
 def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
     try:
@@ -49,6 +43,37 @@ def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]
         response.status_code = status.HTTP_200_OK
 
         return {"message": message}
+
+    except mysql.connector.Error as err:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        print(f"error {err}")
+        return {"message": "Internal server error"}
+
+
+@router.get("/api/users/getFavorites", status_code = 200)
+def get_favorites(response: Response, token: Annotated[str | None, Cookie()]):
+    try:
+        user = authenticate(token)
+
+        if user is False:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {'message': "Invalid token"}
+        
+        uid = user['uid']
+
+        statement = '''
+            SELECT f.rid, r.recipename, r.description FROM favorites f 
+            LEFT JOIN recipes r ON f.rid = r.rid WHERE f.uid = %s;
+        '''
+        
+        cursor.execute(statement, [uid])
+        result = cursor.fetchall()
+
+        if len(result) <= 0:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {'message': "No favorites found"}
+
+        return {'message': result}
 
     except mysql.connector.Error as err:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
