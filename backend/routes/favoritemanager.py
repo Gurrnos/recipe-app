@@ -79,3 +79,39 @@ def get_favorites(response: Response, token: Annotated[str | None, Cookie()]):
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         print(f"error {err}")
         return {"message": "Internal server error"}
+
+class Item(BaseModel):
+    own: bool
+
+@router.get("/api/users/getUserRecipes/", status_code = 200)
+def get_user_recipes(data: Item, response: Response, uid: int = None, token: Annotated[str | None, Cookie()] = None):
+    try:
+        if data.own is True:
+            user = authenticate(token)
+
+            if user is False:
+                response.status_code = status.HTTP_403_FORBIDDEN
+                return {'message': "Invalid token"}
+            
+            uid = user['uid']
+
+        if uid is None:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {'message': "No valid uid"}
+        
+        statement = '''SELECT rid, recipename, description FROM recipes WHERE uid = %s'''
+        cursor.execute(statement, [uid])
+
+        result = cursor.fetchall()
+
+        if len(result) <= 0:
+            response.status_code = status.HTTP_404_NOT_FOUND
+            return {'message': "No recipes found for that user"}
+
+        return {'message': result}
+
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {'message': "Internal server error"}
