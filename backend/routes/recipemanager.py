@@ -134,6 +134,11 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
 
         elif len(data.ingredients) > 0 and data.exclude_own is False:
             param_data = get_rids(data.ingredients)
+
+            if len(param_data) <= 0:
+                response.status_code = status.HTTP_404_NOT_FOUND
+                return {'message': "No recipes found"}
+
             rids = ', '.join(["%s"] * len(param_data))
 
             statement = f'''SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids})
@@ -152,6 +157,11 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
             uid = user['uid']
             
             param_data = get_rids(data.ingredients)
+
+            if len(param_data) <= 0:
+                response.status_code = status.HTTP_404_NOT_FOUND
+                return {'message': "No recipes found"}
+
             rids = ', '.join(["%s"] * len(param_data))
 
             statement = f'''SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids}) 
