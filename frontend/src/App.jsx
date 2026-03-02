@@ -5,7 +5,8 @@ import Header from "./components/Header"
 import Footer from "./components/Footer"
 
 import Index from "./pages/Index"
-import Signup from './pages/SignupPage';
+import Signup from './pages/Signup';
+import Login from './pages/Login';
 
 const Content = () => {
   return (
@@ -31,6 +32,10 @@ const router = createBrowserRouter([
       {
         path: "signup",
         element: <Signup />
+      },
+      {
+        path: "login",
+        element: <Login />
       }
     ]
   }
