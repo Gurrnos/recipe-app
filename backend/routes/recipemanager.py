@@ -177,7 +177,7 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
         result = cursor.fetchall()
 
         response.status_code = status.HTTP_200_OK
-        return {'message': f"data: {result}"}
+        return result
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -231,7 +231,7 @@ def get_detailed_recipe(response: Response, rid: int):
         formatted = recipe_formatter(result)
 
         response.status_code = status.HTTP_200_OK
-        return {'message': f"data: {formatted}"}
+        return formatted
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -249,7 +249,7 @@ def get_top_recepies(response: Response):
         cursor.execute(statement)
         result = cursor.fetchall()
 
-        return {'message': result}
+        return result
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")

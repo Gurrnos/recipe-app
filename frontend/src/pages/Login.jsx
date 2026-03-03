@@ -22,10 +22,13 @@ const Login = () => {
         const data = {
             ...loginData
         };
-        
+
         try {
             await Axios.post("/api/login", data);
+
+            window.location.href = "/";
         } catch (err) {
+            console.log(err);
             alert(err.response?.data?.message)
         }
     }

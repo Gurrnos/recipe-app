@@ -30,6 +30,8 @@ const Signup = () => {
     try {
       await Axios.post("/api/signup", data);
 
+      window.location.href = "/";
+
     } catch (err) {
       alert(err.response?.data?.message)
     }
