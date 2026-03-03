@@ -75,7 +75,7 @@ def get_favorites(response: Response, token: Annotated[str | None, Cookie()]):
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"message": "No favorites found"}
 
-        return {"message": result}
+        return result
 
     except mysql.connector.Error as err:
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -119,7 +119,7 @@ def get_user_recipes(
             response.status_code = status.HTTP_404_NOT_FOUND
             return {"message": "No recipes found for that user"}
 
-        return {"message": result}
+        return result
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
