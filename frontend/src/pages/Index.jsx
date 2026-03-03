@@ -21,6 +21,8 @@ const Index = () => {
                 favoriteCount: recipe.favoriteCount
             }));
 
+            console.log(recipeData);
+
             setRecipies(recipeData);
 
         } catch (err) {
