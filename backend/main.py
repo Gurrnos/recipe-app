@@ -24,6 +24,6 @@ app.include_router(favoritemanager.router)
 
 if __name__ == "__main__":
     subprocess.run(
-        [sys.executable, "-m", "fastapi", "dev", "main.py", "--port", "3000"]
+        [sys.executable, "-m", "fastapi", "dev", "main.py", "--port", "3002"]
     )
     # os.kill(os.getpid(),signal.SIGINT)
