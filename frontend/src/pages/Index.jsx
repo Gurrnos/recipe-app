@@ -21,8 +21,6 @@ const Index = () => {
                 favoriteCount: recipe.favoriteCount
             }));
 
-            console.log(recipeData);
-
             setRecipies(recipeData);
 
         } catch (err) {
@@ -36,7 +34,13 @@ const Index = () => {
             <h2>Index page</h2>
 
             {recipies.map((recipe) => (
-                <RecipeDisplay recipe/>
+                <RecipeDisplay
+                    key={recipe.rid}
+                    rid={recipe.rid}
+                    name={recipe.name}
+                    description={recipe.description}
+                    favoriteCount={recipe.favoriteCount}
+                />
             ))}
         </>
     )

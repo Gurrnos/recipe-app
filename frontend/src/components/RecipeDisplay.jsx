@@ -1,10 +1,20 @@
-const RecipeDisplay = (recipe) => {
+const RecipeDisplay = ({
+    rid,
+    name,
+    description,
+    favoriteCount
+}) => {
+    
+    const handleClick = () => {
+        console.log("Clicked id: ", rid);
+    }
+
     return (
-        <div key={recipe.rid}>
+        <div onClick={handleClick}>
             <p>Component start...</p>
-            <p>Recipe name: {recipe.name}</p>
-            <p>Recipe description: {recipe.description} </p>
-            <p>Recipe favorite count: {recipe.favoriteCount}</p>
+            <p>Recipe name: {name}</p>
+            <p>Recipe description: {description} </p>
+            <p>Recipe favorite count: {favoriteCount}</p>
             <br />
         </div>
     )
