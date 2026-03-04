@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import Axios from "axios";
 import RecipeDisplay from "../components/RecipeDisplay";
 
-const Index = () => {
+const Home = () => {
 
     const [recipies, setRecipies] = useState([]);
 
@@ -33,7 +33,7 @@ const Index = () => {
 
     return (
         <>
-            <h2>Index page</h2>
+            <h2>Home page</h2>
 
             {recipies.map((recipe) => (
                 <RecipeDisplay
@@ -48,4 +48,4 @@ const Index = () => {
     )
 }
 
-export default Index
+export default Home
