@@ -53,7 +53,7 @@ def signup(data: SignupItem, response: Response):
 
         token = jwt.encode(payload, key, algorithm="HS256")
         print(token)
-        #response.set_cookie(key='token', value=token, max_age = 3600 * 4)
+        response.set_cookie(key='token', value=token, max_age = 3600 * 4)
 
         return {"message": f"User {data.username} created successfully"}
 
@@ -101,7 +101,7 @@ def login(data: LoginItem, response: Response):
 
         token = jwt.encode(payload, key, algorithm="HS256")
         print(token)
-        #response.set_cookie(key='token', value=token, max_age = 3600 * 4)
+        response.set_cookie(key='token', value=token, max_age = 3600 * 4)
         return {'message': f"Successfully logged in as {user['username']}"}
 
     except mysql.connector.Error as err:
@@ -109,6 +109,17 @@ def login(data: LoginItem, response: Response):
         print(f"error {err}")
         return {'message': "Internal server error"}
     
+
+@router.post("/api/authenticate", status_code = 200)
+def authenticateUser(response: Response, token: Annotated[str | None, Cookie()]):
+    user = authenticate(token)
+
+    if user is False:
+        response.status_code = status.HTTP_403_FORBIDDEN
+        return {'message': "Invalid token"}
+    
+    return {"uid": user['uid'], "username": user['username']}
+
 
 class UpdateData (BaseModel):
     old_passw: str
