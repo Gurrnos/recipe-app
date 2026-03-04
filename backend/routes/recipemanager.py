@@ -1,26 +1,24 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, Response, status, Cookie
-from config.db_connection import get_db
+from config.db_connection import get_connection
 import mysql.connector
-from mysql.connector import errorcode
-from services.password import hashPassword, checkPassword
-import jwt
-import json
 import os
 from dotenv import load_dotenv
 from services.auth import authenticate
 from typing import Annotated
-from datetime import timezone
-import time, datetime
 
 load_dotenv()
 router = APIRouter()
-db = get_db()
-cursor = db.cursor(dictionary=True)
 key = os.getenv("JWT_SECRET")
 
+def close_connections(connection, cursor):
+    if connection:
+        connection.close()
 
-def insert_steps(rid, data):
+    if cursor:
+        cursor.close()
+
+def insert_steps(rid, data, connection, cursor):
     try:
         for i, step in enumerate(data):
             step_statement = (
@@ -30,12 +28,12 @@ def insert_steps(rid, data):
             cursor.execute(step_statement, values)
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"Error: {err}")
         raise mysql.connector.Error
 
 
-def insert_ingredients(rid, data):
+def insert_ingredients(rid, data, connection, cursor):
     try:
         for ingredient in data:
             values = [rid, ingredient["name"], ingredient["amount"], ingredient["type"]]
@@ -43,7 +41,7 @@ def insert_ingredients(rid, data):
             cursor.execute(ingredient_statement, values)
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"Error: {err}")
         raise mysql.connector.Error
 
@@ -61,6 +59,8 @@ def createRecipe(
     data: CreateRecipe, response: Response, token: Annotated[str | None, Cookie()]
 ):
     try:
+        connection, cursor = get_connection()
+
         user = authenticate(token)
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
@@ -76,21 +76,23 @@ def createRecipe(
 
         rid = cursor.lastrowid
 
-        insert_steps(rid, data.steps)
-        insert_ingredients(rid, data.ingredients)
+        insert_steps(rid, data.steps, connection, cursor)
+        insert_ingredients(rid, data.ingredients, connection, cursor)
 
-        db.commit()
         response.status_code = status.HTTP_201_CREATED
 
         return {"message": f"recipe {data.recipename} created successfully"}
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"error{err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
     
-def get_rids(ingredients):
+    finally:
+        close_connections(connection, cursor)
+    
+def get_rids(ingredients, cursor):
     ingredient_map = ', '.join(["%s"] * len(ingredients))
     r_ids = f'''SELECT rid FROM ingredients WHERE name IN ({ingredient_map})'''
 
@@ -113,6 +115,8 @@ class FilterItem(BaseModel):
 @router.get("/api/getRecipes", status_code = 200)
 def get_recipes(data: FilterItem, response: Response, token: Annotated[str | None, Cookie()] = None):
     try:
+        connection, cursor = get_connection()
+
         statement = ''''''
         values = []
 
@@ -133,7 +137,7 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
             values = [uid, f"%{data.recipename}%"]
 
         elif len(data.ingredients) > 0 and data.exclude_own is False:
-            param_data = get_rids(data.ingredients)
+            param_data = get_rids(data.ingredients, cursor)
 
             if len(param_data) <= 0:
                 response.status_code = status.HTTP_404_NOT_FOUND
@@ -156,7 +160,7 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
 
             uid = user['uid']
             
-            param_data = get_rids(data.ingredients)
+            param_data = get_rids(data.ingredients, cursor)
 
             if len(param_data) <= 0:
                 response.status_code = status.HTTP_404_NOT_FOUND
@@ -183,6 +187,9 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
 
 def recipe_formatter(recipe):
 
@@ -217,6 +224,8 @@ def recipe_formatter(recipe):
 @router.get("/api/getRecipeDetailed/", status_code = 200)
 def get_detailed_recipe(response: Response, rid: int):
     try:
+        connection, cursor = get_connection()
+
         statement = '''
             SELECT DISTINCT r.rid, r.recipename, r.description as recipe_desc, 
             i.name, i.amount, i.type, s.stepNr, s.description as step_desc FROM recipes r 
@@ -238,9 +247,14 @@ def get_detailed_recipe(response: Response, rid: int):
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': "Internal server error"}
     
+    finally:
+        close_connections(connection, cursor)
+    
 @router.get("/api/getTopRecepies", status_code = 200)
 def get_top_recepies(response: Response):
     try:
+        connection, cursor = get_connection()
+
         statement = '''
         SELECT f.rid, r.recipename, r.description, COUNT(f.rid) AS favoriteCount FROM favorites f 
         JOIN recipes r ON f.rid = r.rid GROUP BY f.rid ORDER BY favoriteCount desc LIMIT 10
@@ -255,12 +269,17 @@ def get_top_recepies(response: Response):
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
 
 @router.put("/api/editRecipe/", status_code=200)
 def edit_recipe(
     data: CreateRecipe, response: Response, rid: int, token: Annotated[str | None, Cookie()]
 ):
     try:
+        connection, cursor = get_connection()
+
         user = authenticate(token)
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
@@ -276,19 +295,23 @@ def edit_recipe(
         insert_ingredients(rid, data.ingredients)
         insert_steps(rid, data.steps)
 
-        db.commit()
         response.status_code = status.HTTP_202_ACCEPTED
         return {"message": "Successfully updated recipe"}
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
 
 @router.delete("/api/deleteRecipe/", status_code=200)
 def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
     try:
+        connection, cursor = get_connection()
+
         user = authenticate(token)
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
@@ -303,7 +326,6 @@ def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Coo
 
         cursor.execute(delete_sub_statment, [rid])
         cursor.execute(delete_recipe_statement, Values)
-        db.commit()
 
         if cursor.rowcount == 0:
             response.status_code = status.HTTP_404_NOT_FOUND
@@ -313,8 +335,11 @@ def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Coo
             return {"message": "Successfully deleted recipe"}
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
 

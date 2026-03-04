@@ -1,10 +1,7 @@
-from config.db_connection import get_db
 import jwt
 import os
 from dotenv import load_dotenv
 
-db = get_db()
-cursor = db.cursor(dictionary=True)
 load_dotenv()
 
 

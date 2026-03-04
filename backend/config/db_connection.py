@@ -1,14 +1,12 @@
+import os
+from dotenv import load_dotenv
 import mysql.connector
 from mysql.connector import errorcode
-from dotenv import load_dotenv
-import os
+
 
 load_dotenv()
 
-def get_db():
-
-    try:
-        config = {
+config = {
             'user': os.getenv("DB_USER"),
             'host': os.getenv("DB_HOST"),
             'port': int(os.getenv("DB_PORT")),
@@ -16,21 +14,23 @@ def get_db():
             'database': os.getenv("DATABASE")
         }
 
+try:
+    cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_size = 5, autocommit = True, **config)
 
-        cnx = mysql.connector.connect(**config)
+    print(f"Connected to db: {config['database']}")
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Access denied error: Check your username and password to make sure they match")
 
-        print(f"Connection made to user: {config['user']} on port: {config['port']} with db: {config['database']}")
+    elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        print("Database does not exist")
 
-        return cnx
-    
-    except mysql.connector.Error as err:
-        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-            print("Access denied error: Check your username and password to make sure they match")
+    else:
+        print(err)
 
-        elif err.errno == errorcode.ER_BAD_DB_ERROR:
-            print("Database does not exist")
+def get_connection():
+    connection = cnxpool.get_connection()
 
-        else:
-            print(err)
+    cursor = connection.cursor(dictionary=True)
 
-        return None
+    return connection, cursor

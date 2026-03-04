@@ -1,28 +1,28 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, Response, status, Cookie, HTTPException
-from config.db_connection import get_db
+from config.db_connection import get_connection
 import mysql.connector
-from mysql.connector import errorcode
-from services.password import hashPassword, checkPassword
-import jwt
-import json
 import os
 from dotenv import load_dotenv
 from services.auth import authenticate
 from typing import Annotated
-from datetime import timezone
-import time, datetime
 
 load_dotenv()
 router = APIRouter()
-db = get_db()
-cursor = db.cursor(dictionary=True)
 key = os.getenv("JWT_SECRET")
 
+def close_connections(connection, cursor):
+    if connection:
+        connection.close()
+
+    if cursor:
+        cursor.close()
 
 @router.post("/api/users/toggleFavorite/", status_code=201)
 def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
     try:
+        connection, cursor = get_connection()
+
         user = authenticate(token)
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
@@ -31,7 +31,6 @@ def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]
         toggle_statement = """CALL toggleFavorite(%s, %s, @result)"""
 
         cursor.execute(toggle_statement, (user["uid"], rid))
-        db.commit()
 
         cursor.execute("SELECT @result AS toggle_result")
 
@@ -50,11 +49,15 @@ def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         print(f"error {err}")
         return {"message": "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
 
 
 @router.get("/api/users/getFavorites", status_code=200)
 def get_favorites(response: Response, token: Annotated[str | None, Cookie()]):
     try:
+        connection, cursor = get_connection()
         user = authenticate(token)
 
         if user is False:
@@ -81,11 +84,13 @@ def get_favorites(response: Response, token: Annotated[str | None, Cookie()]):
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         print(f"error {err}")
         return {"message": "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
 
 
 class Item(BaseModel):
     own: bool
-
 
 @router.get("/api/users/getUserRecipes/", status_code=200)
 def get_user_recipes(
@@ -95,6 +100,8 @@ def get_user_recipes(
     token: Annotated[str | None, Cookie()] = None,
 ):
     try:
+        connection, cursor = get_connection()
+
         if data.own is True:
             user = authenticate(token)
 
@@ -125,3 +132,6 @@ def get_user_recipes(
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
+
+    finally:
+        close_connections(connection, cursor)

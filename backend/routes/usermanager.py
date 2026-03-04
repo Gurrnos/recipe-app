@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, Response, status, Cookie
-from config.db_connection import get_db
+from config.db_connection import get_connection
 import mysql.connector
 from mysql.connector import errorcode
 from services.password import hashPassword, checkPassword
@@ -14,9 +14,13 @@ import time, datetime
 
 load_dotenv()
 router = APIRouter()
-db = get_db()
-cursor = db.cursor(dictionary=True)
 key = os.getenv("JWT_SECRET")
+
+def close_connections(connection, cursor):
+    if cursor:
+        cursor.close()
+    if connection:
+        connection.close()
 
 
 class SignupItem(BaseModel):
@@ -27,6 +31,7 @@ class SignupItem(BaseModel):
 @router.post("/api/signup", tags=["users"], status_code = 201)
 def signup(data: SignupItem, response: Response):
     try:
+        connection, cursor = get_connection()
         if len(data.password) > 50:
             response.status_code = status.HTTP_403_FORBIDDEN
             return {'message': "Password exceeding character limit"}
@@ -39,8 +44,6 @@ def signup(data: SignupItem, response: Response):
 
         cursor.execute(statement, values)
         uid = cursor.lastrowid
-
-        db.commit()
 
         response.status_code = status.HTTP_201_CREATED
 
@@ -58,7 +61,7 @@ def signup(data: SignupItem, response: Response):
         return {"message": f"User {data.username} created successfully"}
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
 
         if err.errno == errorcode.ER_DUP_ENTRY:
             response.status_code = status.HTTP_400_BAD_REQUEST
@@ -67,6 +70,9 @@ def signup(data: SignupItem, response: Response):
             print(f"error {err}")
             response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
             return {"message": "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
         
 
 class LoginItem(BaseModel):
@@ -76,6 +82,8 @@ class LoginItem(BaseModel):
 @router.post("/api/login", tags=["users"], status_code = 200)
 def login(data: LoginItem, response: Response):
     try:
+        connection, cursor = get_connection()
+
         statement = '''SELECT * FROM users WHERE email = %s'''
         values = [data.email]
 
@@ -109,6 +117,9 @@ def login(data: LoginItem, response: Response):
         print(f"error {err}")
         return {'message': "Internal server error"}
     
+    finally:
+        close_connections(connection, cursor)
+    
 
 @router.post("/api/authenticate", status_code = 200)
 def authenticateUser(response: Response, token: Annotated[str | None, Cookie()]):
@@ -128,6 +139,8 @@ class UpdateData (BaseModel):
 @router.put("/api/changePassw", status_code = 200)
 def chance_password(data: UpdateData, response: Response, token: Annotated[str | None, Cookie()]):
     try:
+        connection, cursor = get_connection()
+
         user = authenticate(token)
 
         if user is False:
@@ -155,16 +168,18 @@ def chance_password(data: UpdateData, response: Response, token: Annotated[str |
         new_values = [new_passw, uid]
 
         cursor.execute(update_statement, new_values)
-        db.commit()
 
         response.status_code = status.HTTP_202_ACCEPTED
         return {'message': 'Successfully updated password'}
     
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': "Internal server error"}
+    
+    finally:
+        close_connections(connection, cursor)
 
 
 class UsernameItem (BaseModel):
@@ -173,6 +188,7 @@ class UsernameItem (BaseModel):
 @router.put("/api/changeUsername", status_code = 200)
 def change_username(data: UsernameItem, response: Response, token: Annotated[str | None, Cookie()]):
     try:
+        connection, cursor = get_connection()
         user = authenticate(token)
 
         if user is False:
@@ -185,22 +201,25 @@ def change_username(data: UsernameItem, response: Response, token: Annotated[str
         statement = '''UPDATE users SET username = %s WHERE uid = %s'''
 
         cursor.execute(statement, values)
-        db.commit()
         
         response.status_code = status.HTTP_202_ACCEPTED
         return {'message': "Successfully updated username"}
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"Error: {err}")
 
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': "Internal server error"}
     
+    finally:
+        close_connections(connection, cursor)
+    
 
 @router.delete("/api/deleteAccount", status_code = 200)
 def delete_account(response: Response, token: Annotated[str | None, Cookie()]):
     try:
+        connection, cursor = get_connection()
         user = authenticate(token)
 
         if user is False:
@@ -213,7 +232,6 @@ def delete_account(response: Response, token: Annotated[str | None, Cookie()]):
         statement = '''DELETE FROM users WHERE uid = %s'''
 
         cursor.execute(statement, values)
-        db.commit()
 
         if cursor.rowcount == 0:
             response.status_code = status.HTTP_404_NOT_FOUND
@@ -223,8 +241,10 @@ def delete_account(response: Response, token: Annotated[str | None, Cookie()]):
             return {'message': 'Successfully deleted account'}
 
     except mysql.connector.Error as err:
-        db.rollback()
+        connection.rollback()
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {'message': 'Internal server error'}
     
+    finally:
+        close_connections(connection, cursor)
