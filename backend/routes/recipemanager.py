@@ -292,8 +292,8 @@ def edit_recipe(
         delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
         cursor.execute(delete_sub_statment, [rid])
 
-        insert_ingredients(rid, data.ingredients)
-        insert_steps(rid, data.steps)
+        insert_ingredients(rid, data.ingredients, connection, cursor)
+        insert_steps(rid, data.steps, connection, cursor)
 
         response.status_code = status.HTTP_202_ACCEPTED
         return {"message": "Successfully updated recipe"}
