@@ -95,7 +95,7 @@ CREATE TABLE `recipes` (
 
 LOCK TABLES `recipes` WRITE;
 /*!40000 ALTER TABLE `recipes` DISABLE KEYS */;
-INSERT INTO `recipes` VALUES (2,'chicken recipe','tasty chicken',1,3,'2026-03-04'),(3,'chicken recipe','tasty chicken',1,3,NULL);
+INSERT INTO `recipes` VALUES (2,'chicken recipe','tasty chicken',1,3,'2026-03-05'),(3,'chicken recipe','tasty chicken',1,3,NULL);
 /*!40000 ALTER TABLE `recipes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -138,7 +138,7 @@ CREATE TABLE `steps` (
 
 LOCK TABLES `steps` WRITE;
 /*!40000 ALTER TABLE `steps` DISABLE KEYS */;
-INSERT INTO `steps` VALUES (3,1,'cook rice'),(3,2,'cut vegetables'),(3,3,'cook chicken'),(2,1,'FRY DOG'),(2,2,'cut vegetables'),(2,3,'cook chicken'),(2,4,'EAT');
+INSERT INTO `steps` VALUES (3,1,'cook rice'),(3,2,'cut vegetables'),(3,3,'cook chicken'),(2,1,'FRY DOG'),(2,2,'cut vegetables'),(2,3,'cook chicken'),(2,4,'DO NOT EAT');
 /*!40000 ALTER TABLE `steps` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -165,13 +165,26 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (3,'test','test@email.com','$2b$12$mGR1JmIdLSlXIaea.7FFCOvjlvw.lgekb/SrVfbiwPExm/lyv.lce'),(6,'username','username@email.com','$2b$12$423i5.lp2ycwemLW1OLYCOLWmRN02u6jBZALvAcQXTcpHeX4T17uC'),(8,'tester','tester@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(10,'tester','testing@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(11,'testuser','testuser@email.com','$2b$12$5PoLregJh1zefm8.yMcz2.ur/V1IwSHgnRwzZOvrVUx1bnWBvA6Ji');
+INSERT INTO `users` VALUES (3,'test','test@email.com','$2b$12$mGR1JmIdLSlXIaea.7FFCOvjlvw.lgekb/SrVfbiwPExm/lyv.lce'),(6,'username','username@email.com','$2b$12$423i5.lp2ycwemLW1OLYCOLWmRN02u6jBZALvAcQXTcpHeX4T17uC'),(8,'tester','tester@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(10,'tester','testing@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Dumping events for database 'recipeapp'
---
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8mb4 */ ;
+/*!50003 SET character_set_results = utf8mb4 */ ;
+/*!50003 SET collation_connection  = utf8mb4_0900_ai_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `delete_favorites` BEFORE DELETE ON `users` FOR EACH ROW BEGIN
+	DELETE FROM favorites WHERE uid = OLD.uid;
+END */;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
 -- Dumping routines for database 'recipeapp'
@@ -220,4 +233,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-04 22:45:46
+-- Dump completed on 2026-03-07 21:44:03
