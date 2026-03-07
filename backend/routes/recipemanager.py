@@ -92,10 +92,6 @@ def createRecipe(
     finally:
         close_connections(connection, cursor)
     
-def get_rids(ingredients, cursor):
-    ingredient_map = ', '.join(["%s"] * len(ingredients))
-    r_ids = f'''SELECT rid FROM ingredients WHERE name IN ({ingredient_map})'''
-
 
 def get_rids(ingredients, cursor):
     ingredient_map = ", ".join(["%s"] * len(ingredients))
