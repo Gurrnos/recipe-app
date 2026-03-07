@@ -11,6 +11,7 @@ export default function Navbar() {
             <CustomLink to="/Landing">Landing</CustomLink>
             <CustomLink to="/Login">Login</CustomLink>
             <CustomLink to="/Signup">Signup</CustomLink>
+            <CustomLink to="/account">Account</CustomLink>
       </ul>
     </nav>
   )

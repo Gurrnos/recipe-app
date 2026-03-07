@@ -201,7 +201,17 @@ def change_username(data: UsernameItem, response: Response, token: Annotated[str
         statement = '''UPDATE users SET username = %s WHERE uid = %s'''
 
         cursor.execute(statement, values)
+
+        payload = {
+            'uid': uid,
+            'username': data.new_username,
+            'email': user['email'],
+            'exp': datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(hours = 4)
+        }
         
+        token = jwt.encode(payload, key, algorithm="HS256")
+        response.set_cookie(key='token', value=token, max_age = 3600 * 4)
+
         response.status_code = status.HTTP_202_ACCEPTED
         return {'message': "Successfully updated username"}
 
