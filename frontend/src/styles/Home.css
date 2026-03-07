@@ -1,0 +1,24 @@
+.main-content {
+    padding: 20px 40px;
+}
+
+.section-title {
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.recipes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.message {
+    text-align: center;
+    color: #666;
+    margin-top: 50px;
+    font-size: 1.1rem;
+    grid-column: 1 / -1;
+}
