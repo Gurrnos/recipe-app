@@ -89,47 +89,50 @@ def createRecipe(
         print(f"error{err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
-    
-def get_rids(ingredients):
-    ingredient_map = ', '.join(["%s"] * len(ingredients))
-    r_ids = f'''SELECT rid FROM ingredients WHERE name IN ({ingredient_map})'''
 
+
+def get_rids(ingredients):
+    ingredient_map = ", ".join(["%s"] * len(ingredients))
+    r_ids = f"""SELECT rid FROM ingredients WHERE name IN ({ingredient_map})"""
 
     cursor.execute(r_ids, ingredients)
     result = cursor.fetchall()
 
     rid_data = []
     for rid in result:
-        rid_data.append(int(rid['rid']))
-    
+        rid_data.append(int(rid["rid"]))
+
     return rid_data
-    
+
 
 class FilterItem(BaseModel):
     recipename: str
     ingredients: list
     exclude_own: bool
 
-@router.get("/api/getRecipes", status_code = 200)
-def get_recipes(data: FilterItem, response: Response, token: Annotated[str | None, Cookie()] = None):
+
+@router.get("/api/getRecipes", status_code=200)
+def get_recipes(
+    data: FilterItem, response: Response, token: Annotated[str | None, Cookie()] = None
+):
     try:
-        statement = ''''''
+        statement = """"""
         values = []
 
         if len(data.ingredients) < 1 and data.exclude_own is False:
-            statement = '''SELECT rid, recipename, description, uid FROM recipes WHERE recipename LIKE %s'''
+            statement = """SELECT rid, recipename, description, uid FROM recipes WHERE recipename LIKE %s"""
             values = [f"%{data.recipename}%"]
-        
+
         elif len(data.ingredients) < 1 and data.exclude_own is True:
             user = authenticate(token)
 
             if user is False:
                 response.status_code = status.HTTP_403_FORBIDDEN
-                return {'message': "Invalid token"}
+                return {"message": "Invalid token"}
 
-            uid = user['uid']
+            uid = user["uid"]
 
-            statement = '''SELECT rid, recipename, description, uid FROM recipes WHERE uid != %s AND recipename LIKE %s'''
+            statement = """SELECT rid, recipename, description, uid FROM recipes WHERE uid != %s AND recipename LIKE %s"""
             values = [uid, f"%{data.recipename}%"]
 
         elif len(data.ingredients) > 0 and data.exclude_own is False:
@@ -137,13 +140,13 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
 
             if len(param_data) <= 0:
                 response.status_code = status.HTTP_404_NOT_FOUND
-                return {'message': "No recipes found"}
+                return {"message": "No recipes found"}
 
-            rids = ', '.join(["%s"] * len(param_data))
+            rids = ", ".join(["%s"] * len(param_data))
 
-            statement = f'''SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids})
+            statement = f"""SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids})
             AND recipename LIKE %s
-            '''
+            """
             param_data.append(f"%{data.recipename}%")
             values = param_data
 
@@ -152,26 +155,25 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
 
             if user is False:
                 response.status_code = status.HTTP_403_FORBIDDEN
-                return {'message': "Invalid token"}
+                return {"message": "Invalid token"}
 
-            uid = user['uid']
-            
+            uid = user["uid"]
+
             param_data = get_rids(data.ingredients)
 
             if len(param_data) <= 0:
                 response.status_code = status.HTTP_404_NOT_FOUND
-                return {'message': "No recipes found"}
+                return {"message": "No recipes found"}
 
-            rids = ', '.join(["%s"] * len(param_data))
+            rids = ", ".join(["%s"] * len(param_data))
 
-            statement = f'''SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids}) 
+            statement = f"""SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids}) 
             AND uid != %s AND recipename LIKE %s
-            '''
+            """
             param_data.append(uid)
             param_data.append(f"%{data.recipename}%")
             values = param_data
 
-            
         cursor.execute(statement, values)
 
         result = cursor.fetchall()
@@ -182,7 +184,8 @@ def get_recipes(data: FilterItem, response: Response, token: Annotated[str | Non
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {'message': "Internal server error"}
+        return {"message": "Internal server error"}
+
 
 def recipe_formatter(recipe):
 
@@ -193,36 +196,40 @@ def recipe_formatter(recipe):
     seen_steps = []
 
     for data in recipe:
-        if data['name'] not in seen_ingredients:
-            ingredient_list.append({'name': data['name'], 'amount': data['amount'], 'type': data['type']})
-        
-            seen_ingredients.append(data['name'])
+        if data["name"] not in seen_ingredients:
+            ingredient_list.append(
+                {"name": data["name"], "amount": data["amount"], "type": data["type"]}
+            )
 
-        if data['stepNr'] not in seen_steps:
-            step_list.append({'stepNr': data['stepNr'], 'description': data['step_desc']})
+            seen_ingredients.append(data["name"])
 
-            seen_steps.append(data['stepNr'])
+        if data["stepNr"] not in seen_steps:
+            step_list.append(
+                {"stepNr": data["stepNr"], "description": data["step_desc"]}
+            )
+
+            seen_steps.append(data["stepNr"])
 
     recipe_data = {
-        'rid': recipe[0]['rid'],
-        'recipename': recipe[0]['recipename'], 
-        'description': recipe[0]['recipe_desc'],
-        'ingredients': ingredient_list,
-        'steps': step_list
+        "rid": recipe[0]["rid"],
+        "recipename": recipe[0]["recipename"],
+        "description": recipe[0]["recipe_desc"],
+        "ingredients": ingredient_list,
+        "steps": step_list,
     }
 
     return recipe_data
 
 
-@router.get("/api/getRecipeDetailed/", status_code = 200)
+@router.get("/api/getRecipeDetailed/", status_code=200)
 def get_detailed_recipe(response: Response, rid: int):
     try:
-        statement = '''
+        statement = """
             SELECT DISTINCT r.rid, r.recipename, r.description as recipe_desc, 
             i.name, i.amount, i.type, s.stepNr, s.description as step_desc FROM recipes r 
             INNER JOIN ingredients i ON r.rid = i.rid 
             INNER JOIN steps s ON r.rid = s.rid WHERE r.rid = %s
-        '''
+        """
 
         cursor.execute(statement, [rid])
 
@@ -236,15 +243,16 @@ def get_detailed_recipe(response: Response, rid: int):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {'message': "Internal server error"}
-    
-@router.get("/api/getTopRecepies", status_code = 200)
+        return {"message": "Internal server error"}
+
+
+@router.get("/api/getTopRecepies", status_code=200)
 def get_top_recepies(response: Response):
     try:
-        statement = '''
+        statement = """
         SELECT f.rid, r.recipename, r.description, COUNT(f.rid) AS favoriteCount FROM favorites f 
         JOIN recipes r ON f.rid = r.rid GROUP BY f.rid ORDER BY favoriteCount desc LIMIT 10
-        '''
+        """
 
         cursor.execute(statement)
         result = cursor.fetchall()
@@ -254,11 +262,15 @@ def get_top_recepies(response: Response):
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-        return {'message': "Internal server error"}
+        return {"message": "Internal server error"}
+
 
 @router.put("/api/editRecipe/", status_code=200)
 def edit_recipe(
-    data: CreateRecipe, response: Response, rid: int, token: Annotated[str | None, Cookie()]
+    data: CreateRecipe,
+    response: Response,
+    rid: int,
+    token: Annotated[str | None, Cookie()],
 ):
     try:
         user = authenticate(token)
@@ -285,6 +297,7 @@ def edit_recipe(
         print(f"Error: {err}")
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
+
 
 @router.delete("/api/deleteRecipe/", status_code=200)
 def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
@@ -318,3 +331,16 @@ def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Coo
         response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
         return {"message": "Internal server error"}
 
+
+@router.get("/api/getAllRecipes", status_code=200)
+def get_all_recipes(response: Response):
+    try:
+        statement = """SELECT rid, recipename, description, uid From recipes ORDER BY rid DESC"""
+        cursor.execute(statement)
+        result = cursor.fetchall()
+        response.status_code = status.HTTP_200_OK
+        return result
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {"message": "Internal server error"}

@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
 import Axios from "axios";
 import RecipeDisplay from "../components/RecipeDisplay";
+import "../styles/Home.css"
 
 const Home = () => {
-
-    const [recipies, setRecipies] = useState([]);
+    const [recipes, setRecipes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         getTopRecepies();
@@ -23,29 +24,39 @@ const Home = () => {
 
             console.log(recipeData);
 
-            setRecipies(recipeData);
+            setRecipes(recipeData);
 
         } catch (err) {
             alert(err.response?.data?.message);
             console.log(err);
         }
+         finally {
+            setLoading(false);
+        }
     }
 
-    return (
-        <>
-            <h2>Home page</h2>
+    if (loading) return <div>Loading recipes...</div>;
 
-            {recipies.map((recipe) => (
-                <RecipeDisplay
-                    key={recipe.rid}
-                    rid={recipe.rid}
-                    name={recipe.name}
-                    description={recipe.description}
-                    favoriteCount={recipe.favoriteCount}
-                />
-            ))}
-        </>
+    return (
+        <div className="home-container">
+            <h2>All Recipes</h2>
+            {recipes.length === 0 ? (
+                <p>No recipes found.</p>
+            ) : (
+                <div className="recipes-grid">
+                    {recipes.map((recipe) => (
+                        <RecipeDisplay
+                            key={recipe.rid}
+                            rid={recipe.rid}
+                            name={recipe.name}
+                            description={recipe.description}
+                            favoriteCount={recipe.favoriteCount}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
     )
 }
 
-export default Home
+export default Home;

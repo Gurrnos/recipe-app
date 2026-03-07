@@ -1,21 +1,16 @@
-const RecipeDisplay = ({
-    rid,
-    name,
-    description,
-    favoriteCount
-}) => {
+import "../styles/RecipeDisplay.css"; 
+
+const RecipeDisplay = ({ rid, name, description, favoriteCount }) => {
     
     const handleClick = () => {
-        console.log("Clicked id: ", rid);
+        console.log("Clicked recipe ID: ", rid);
     }
 
     return (
-        <div onClick={handleClick}>
-            <p>Component start...</p>
-            <p>Recipe name: {name}</p>
-            <p>Recipe description: {description} </p>
-            <p>Recipe favorite count: {favoriteCount}</p>
-            <br />
+        <div className="recipe-card" onClick={handleClick}>
+            <h2 className="recipe-title">{name}</h2>
+            <p className="recipe-description">{description}</p>
+            {favoriteCount && (<p>Recipe favorite count: {favoriteCount}</p>) || <></>}
         </div>
     )
 }
