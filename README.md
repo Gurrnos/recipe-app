@@ -9,7 +9,8 @@ DB_PORT=(your db port here)
 DB_PASSWORD=(your db password here)  
 DATABASE=(your database here)  
    
-JWT_SECRET=(your secret token here)  
+JWT_SECRET=(your secret token here) | You can use the following command in a linux terminal to generate a string:  
+openssl rand -hex 32
   
 
 Create a virtual environment and install the required pip packages, details below.  
@@ -17,6 +18,10 @@ Create a virtual environment and install the required pip packages, details belo
 <ins>Activate the venv:</ins> venv/Scripts/activate  
 <ins>Install the required packages:</ins> pip install mysql-connector-python python-dotenv "fastapi[standard]" bcrypt pyjwt  
 <ins>Run the program:</ins> python main.py  
+  
+For the frontend, make sure you have node, then simply run <ins>npm i</ins> to install the required packages  
+Then run <ins>npm run dev</ins> to start the frontend  
+
   
 
 # Changelog
