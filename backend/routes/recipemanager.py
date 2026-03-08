@@ -113,7 +113,7 @@ class FilterItem(BaseModel):
     exclude_own: bool
 
 
-@router.get("/api/getRecipes", status_code=200)
+@router.post("/api/getRecipes", status_code=200)
 def get_recipes(
     data: FilterItem, response: Response, token: Annotated[str | None, Cookie()] = None
 ):
