@@ -215,11 +215,23 @@ const Account = () => {
         }
     }
 
+    const deleteAccount = async () => {
+        try {
+            await Axios.delete("/api/deleteAccount", {withCredentials: true});
+
+            alert("Deleted account");
+            
+        } catch (err) {
+            alert(err.response?.data?.message);
+        }
+    }
+
     return(
         <>
             <h1>Account page</h1>
 
             <h2>Hello {username}</h2>
+            <button onClick={deleteAccount}>Delete account (irreversible)</button>
 
             <h2>Your favorited recepies:</h2>
             <div className="recipes-grid">

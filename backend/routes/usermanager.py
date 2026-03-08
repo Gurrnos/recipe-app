@@ -243,12 +243,9 @@ def delete_account(response: Response, token: Annotated[str | None, Cookie()]):
 
         cursor.execute(statement, values)
 
-        if cursor.rowcount == 0:
-            response.status_code = status.HTTP_404_NOT_FOUND
-            return {'message': 'Deletion failed, user not found'}
-        else:
-            response.status_code = status.HTTP_200_OK
-            return {'message': 'Successfully deleted account'}
+        response.status_code = status.HTTP_200_OK
+        response.delete_cookie(key='token')
+        return {'message': 'Successfully deleted account'}
 
     except mysql.connector.Error as err:
         connection.rollback()
