@@ -4,6 +4,7 @@ import RecipeDisplay from "../components/RecipeDisplay";
 
 const Account = () => {
     const [favoritedRecipes, setFavoritedRecepies] = useState([]);
+    const [yourRecipes, setYourRecipes] = useState([]);
     const [username, setUsername] = useState("");
     const [passwordData, setPasswordData] = useState({
         old_passw: "",
@@ -16,6 +17,7 @@ const Account = () => {
     useEffect(() => {
         auth();
         getFavorited();
+        getOwnRecipes();
     }, []);
 
     const auth = async () => {
@@ -39,6 +41,22 @@ const Account = () => {
             }));
 
             setFavoritedRecepies(recipeData);
+        } catch (err) {
+            alert(err.response?.data?.message);
+        }
+    }
+
+    const getOwnRecipes = async () => {
+        try {
+            const res = await Axios.get("/api/users/getUserRecipes/", { withCredentials: true, params: { own: true } });
+            
+            const recipeData = res.data.map((recipe) => ({
+                rid: recipe.rid,
+                name: recipe.recipename,
+                description: recipe.description
+            }));
+
+            setYourRecipes(recipeData);
         } catch (err) {
             alert(err.response?.data?.message);
         }
@@ -113,6 +131,15 @@ const Account = () => {
                 />
             ))}
 
+            <h2>Your recipes:</h2>
+            {yourRecipes.map((recipe) => (
+                <RecipeDisplay
+                    key={recipe.rid}
+                    rid={recipe.rid}
+                    name={recipe.name}
+                    description={recipe.description}
+                />
+            ))}
             <h2>Change password</h2>
             <form onSubmit={(e) => updateData(e, "passw")}>
                 <label>Old password:</label>

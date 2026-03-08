@@ -89,20 +89,19 @@ def get_favorites(response: Response, token: Annotated[str | None, Cookie()]):
         close_connections(connection, cursor)
 
 
-class Item(BaseModel):
-    own: bool
 
 @router.get("/api/users/getUserRecipes/", status_code=200)
 def get_user_recipes(
-    data: Item,
     response: Response,
+    own: bool,
     uid: int = None,
     token: Annotated[str | None, Cookie()] = None,
 ):
     try:
         connection, cursor = get_connection()
+        print(own, token)
 
-        if data.own is True:
+        if own is True:
             user = authenticate(token)
 
             if user is False:
