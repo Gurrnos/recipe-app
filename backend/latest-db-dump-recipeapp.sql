@@ -23,8 +23,9 @@ DROP TABLE IF EXISTS `favorites`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `favorites` (
-  `uid` int DEFAULT NULL,
-  `rid` int DEFAULT NULL,
+  `uid` int NOT NULL,
+  `rid` int NOT NULL,
+  PRIMARY KEY (`uid`,`rid`),
   KEY `uid` (`uid`),
   KEY `rid` (`rid`),
   CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`),
@@ -38,7 +39,7 @@ CREATE TABLE `favorites` (
 
 LOCK TABLES `favorites` WRITE;
 /*!40000 ALTER TABLE `favorites` DISABLE KEYS */;
-INSERT INTO `favorites` VALUES (6,3),(3,3);
+INSERT INTO `favorites` VALUES (3,3),(6,2),(6,3),(6,5);
 /*!40000 ALTER TABLE `favorites` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -54,9 +55,11 @@ CREATE TABLE `ingredients` (
   `name` varchar(50) DEFAULT NULL,
   `amount` varchar(50) DEFAULT NULL,
   `type` varchar(50) DEFAULT NULL,
+  `iid` int NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`iid`),
   KEY `rid` (`rid`),
   CONSTRAINT `ingredients_ibfk_1` FOREIGN KEY (`rid`) REFERENCES `recipes` (`rid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -65,7 +68,7 @@ CREATE TABLE `ingredients` (
 
 LOCK TABLES `ingredients` WRITE;
 /*!40000 ALTER TABLE `ingredients` DISABLE KEYS */;
-INSERT INTO `ingredients` VALUES (3,'chicken','500g','meat'),(3,'tomato','1/2','vegetable'),(3,'rice','2 dl','rice'),(2,'DOG','500g','meat'),(2,'tomato','1/2','vegetable'),(2,'rice','2 dl','rice');
+INSERT INTO `ingredients` VALUES (3,'chicken','500g','meat',1),(3,'tomato','1/2','vegetable',2),(3,'rice','2 dl','rice',3),(5,'test','500g','test',4),(5,'tester','200g','tester',5),(2,'tomato','1/2','vegetable',6),(2,'rice','2 dl','rice',7),(6,'pork medallion','500g','meat',8),(6,'potato','2 whole','compliment',9),(6,'bbq sauce','200ml','sauce',10),(7,'test','500g','ing',11);
 /*!40000 ALTER TABLE `ingredients` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -86,7 +89,7 @@ CREATE TABLE `recipes` (
   PRIMARY KEY (`rid`),
   KEY `uid` (`uid`),
   CONSTRAINT `recipes_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -95,7 +98,7 @@ CREATE TABLE `recipes` (
 
 LOCK TABLES `recipes` WRITE;
 /*!40000 ALTER TABLE `recipes` DISABLE KEYS */;
-INSERT INTO `recipes` VALUES (2,'chicken recipe','tasty chicken',1,3,'2026-03-05'),(3,'chicken recipe','tasty chicken',1,3,NULL);
+INSERT INTO `recipes` VALUES (2,'chicken recipe','tasty chicken',1,3,'2026-03-08'),(3,'chicken recipe','tasty chicken',1,3,NULL),(5,'a testy recipe','a very testing recipe',1,3,NULL),(6,'pork medallions','tasty pork medallions',1,6,NULL),(7,'testrescp','test',1,6,NULL);
 /*!40000 ALTER TABLE `recipes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -124,9 +127,10 @@ DROP TABLE IF EXISTS `steps`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `steps` (
-  `rid` int DEFAULT NULL,
-  `stepNr` int DEFAULT NULL,
+  `rid` int NOT NULL,
+  `stepNr` int NOT NULL,
   `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`rid`,`stepNr`),
   KEY `rid` (`rid`),
   CONSTRAINT `steps_ibfk_1` FOREIGN KEY (`rid`) REFERENCES `recipes` (`rid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -138,7 +142,7 @@ CREATE TABLE `steps` (
 
 LOCK TABLES `steps` WRITE;
 /*!40000 ALTER TABLE `steps` DISABLE KEYS */;
-INSERT INTO `steps` VALUES (3,1,'cook rice'),(3,2,'cut vegetables'),(3,3,'cook chicken'),(2,1,'FRY DOG'),(2,2,'cut vegetables'),(2,3,'cook chicken'),(2,4,'DO NOT EAT');
+INSERT INTO `steps` VALUES (2,1,'cut vegetables'),(2,2,'cook chicken'),(2,3,'DO NOT EAT'),(3,1,'cook rice'),(3,2,'cut vegetables'),(3,3,'cook chicken'),(5,1,'cook test'),(5,2,'cook tester'),(6,1,'cook pork medallion'),(6,2,'put potato in oven 30 minutes'),(6,3,'pour sauce on that meat'),(7,1,'cook test'),(7,2,'burn test');
 /*!40000 ALTER TABLE `steps` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -156,7 +160,7 @@ CREATE TABLE `users` (
   `password` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -165,7 +169,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (3,'test','test@email.com','$2b$12$mGR1JmIdLSlXIaea.7FFCOvjlvw.lgekb/SrVfbiwPExm/lyv.lce'),(6,'username','username@email.com','$2b$12$423i5.lp2ycwemLW1OLYCOLWmRN02u6jBZALvAcQXTcpHeX4T17uC'),(8,'tester','tester@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(10,'tester','testing@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi');
+INSERT INTO `users` VALUES (3,'test','test@email.com','$2b$12$y1Hgt4g9rEFNY/N7d4C0xehjBd6znoCBckP7.OVIXs6pYRzGBmzyu'),(6,'username','username@email.com','$2b$12$423i5.lp2ycwemLW1OLYCOLWmRN02u6jBZALvAcQXTcpHeX4T17uC'),(8,'tester','tester@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(10,'tester','testing@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -233,4 +237,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-07 21:44:03
+-- Dump completed on 2026-03-08 21:30:40
