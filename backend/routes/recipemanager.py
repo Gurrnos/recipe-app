@@ -329,7 +329,7 @@ def edit_recipe(
 
 
 @router.delete("/api/deleteRecipe/", status_code=200)
-def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
+def delete_recipe(response: Response, p_rid: int, token: Annotated[str | None, Cookie()]):
     try:
         connection, cursor = get_connection()
 
@@ -341,19 +341,19 @@ def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Coo
         uid = user["uid"]
 
         get_creator = '''SELECT uid FROM recipes WHERE rid = %s'''
-        cursor.execute(get_creator, [rid])
-        owner = cursor.fetchall()
+        cursor.execute(get_creator, [p_rid])
+        owner = cursor.fetchone()
 
-        if uid != owner:
+        if uid != owner['uid']:
             response.status_code = status.HTTP_403_FORBIDDEN
             return {'message': "You are not the owner of this recipe"}
 
-        Values = [rid, uid]
+        Values = [p_rid, uid]
 
         delete_recipe_statement = """DELETE FROM recipes WHERE rid = %s AND uid = %s"""
         delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
 
-        cursor.execute(delete_sub_statment, [rid])
+        cursor.execute(delete_sub_statment, [p_rid])
         cursor.execute(delete_recipe_statement, Values)
 
         if cursor.rowcount == 0:
