@@ -213,7 +213,7 @@ def recipe_formatter(recipe):
 
         if data["stepNr"] not in seen_steps:
             step_list.append(
-                {"stepNr": data["stepNr"], "description": data["step_desc"]}
+                data["step_desc"]
             )
 
             seen_steps.append(data["stepNr"])
@@ -222,6 +222,7 @@ def recipe_formatter(recipe):
         "rid": recipe[0]["rid"],
         "recipename": recipe[0]["recipename"],
         "description": recipe[0]["recipe_desc"],
+        'ispublic': recipe[0]["ispublic"],
         "ingredients": ingredient_list,
         "steps": step_list,
     }
@@ -235,7 +236,7 @@ def get_detailed_recipe(response: Response, rid: int):
         connection, cursor = get_connection()
 
         statement = '''
-            SELECT DISTINCT r.rid, r.recipename, r.description as recipe_desc, 
+            SELECT DISTINCT r.rid, r.recipename, r.description as recipe_desc, r.ispublic,
             i.name, i.amount, i.type, s.stepNr, s.description as step_desc FROM recipes r 
             INNER JOIN ingredients i ON r.rid = i.rid 
             INNER JOIN steps s ON r.rid = s.rid WHERE r.rid = %s
@@ -295,6 +296,14 @@ def edit_recipe(
         if user is False:
             response.status_code = status.HTTP_403_FORBIDDEN
             return {"message": "Invalid token"}
+        
+        get_creator = '''SELECT uid FROM recipes WHERE rid = %s'''
+        cursor.execute(get_creator, [rid])
+        owner = cursor.fetchone()
+
+        if user['uid'] != owner['uid']:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {'message': "You are not the owner of this recipe"}
 
         update_recipe = """UPDATE recipes SET recipename = %s, description = %s, ispublic = %s WHERE rid = %s"""
         update_values = [data.recipename, data.description, data.ispublic, rid]
@@ -330,6 +339,14 @@ def delete_recipe(response: Response, rid: int, token: Annotated[str | None, Coo
             return {"message": "Invalid token"}
 
         uid = user["uid"]
+
+        get_creator = '''SELECT uid FROM recipes WHERE rid = %s'''
+        cursor.execute(get_creator, [rid])
+        owner = cursor.fetchall()
+
+        if uid != owner:
+            response.status_code = status.HTTP_403_FORBIDDEN
+            return {'message': "You are not the owner of this recipe"}
 
         Values = [rid, uid]
 
