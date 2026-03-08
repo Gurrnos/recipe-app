@@ -19,7 +19,7 @@ def close_connections(connection, cursor):
         cursor.close()
 
 @router.post("/api/users/toggleFavorite/", status_code=201)
-def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]):
+def add_fav(response: Response, p_rid: int, token: Annotated[str | None, Cookie()]):
     try:
         connection, cursor = get_connection()
 
@@ -30,7 +30,7 @@ def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]
 
         toggle_statement = """CALL toggleFavorite(%s, %s, @result)"""
 
-        cursor.execute(toggle_statement, (user["uid"], rid))
+        cursor.execute(toggle_statement, (user["uid"], p_rid))
 
         cursor.execute("SELECT @result AS toggle_result")
 
@@ -38,9 +38,9 @@ def add_fav(response: Response, rid: int, token: Annotated[str | None, Cookie()]
 
         print(result)
         if result == 1:
-            message = f"Added Recipe with ID: {rid} to favorites"
+            message = f"Added Recipe with ID: {p_rid} to favorites"
         else:
-            message = f"Removed Recipe with ID: {rid} from favorites"
+            message = f"Removed Recipe with ID: {p_rid} from favorites"
 
         response.status_code = status.HTTP_200_OK
         return {"message": message}

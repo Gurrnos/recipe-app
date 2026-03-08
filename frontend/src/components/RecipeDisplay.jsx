@@ -14,8 +14,20 @@ const RecipeDisplay = ({ rid, name, description, favoriteCount }) => {
         console.log("Clicked recipe ID: ", rid);
     }
 
+    const toggleFavorite = async () => {
+        try {
+            const res = await Axios.post(`/api/users/toggleFavorite/?p_rid=${rid}`, { withCredentials: true });
+
+            alert(res.data?.message);
+        } catch (err) {
+            alert(err.response?.data?.message);
+        }
+        console.log("Clicked recipe ID: ", rid);
+    }
+
     return (
         <div className="recipe-card">
+            <button onClick={toggleFavorite}>Toggle favorite</button>
             <h2 className="recipe-title">{name}</h2>
             <p className="recipe-description">{description}</p>
             {favoriteCount && (<p>Recipe favorite count: {favoriteCount}</p>) || <></>}
