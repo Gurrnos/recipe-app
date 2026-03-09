@@ -25,8 +25,12 @@ const RecipeDisplay = ({ rid, name, description, favoriteCount }) => {
         console.log("Clicked recipe ID: ", rid);
     }
 
+    const routeTo = () => {
+        window.location.href = `/Recipe/?rid=${rid}`
+    }
+
     return (
-        <div className="recipe-card">
+        <div className="recipe-card" onClick={routeTo}>
             <button onClick={toggleFavorite}>Toggle favorite</button>
             <h2 className="recipe-title">{name}</h2>
             <p className="recipe-description">{description}</p>
