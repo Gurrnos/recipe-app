@@ -9,7 +9,7 @@ export default function Navbar() {
   return (
     <nav className="nav">
       <Link to="/" className="site-title">
-        Site Name
+        Recipeapp
       </Link>
       <button onClick={LogOut}>Log out</button>
       <ul>

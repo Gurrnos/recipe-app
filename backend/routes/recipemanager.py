@@ -246,8 +246,6 @@ def get_detailed_recipe(response: Response, rid: int):
 
         result = cursor.fetchall()
 
-        print(result)
-
         formatted = recipe_formatter(result)
 
         response.status_code = status.HTTP_200_OK
@@ -353,9 +351,9 @@ def delete_recipe(response: Response, p_rid: int, token: Annotated[str | None, C
         Values = [p_rid, uid]
 
         delete_recipe_statement = """DELETE FROM recipes WHERE rid = %s AND uid = %s"""
-        delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
+        #delete_sub_statment = """DELETE s,i FROM steps s JOIN ingredients i ON s.rid = i.rid WHERE s.rid = %s"""
 
-        cursor.execute(delete_sub_statment, [p_rid])
+        #cursor.execute(delete_sub_statment, [p_rid])
         cursor.execute(delete_recipe_statement, Values)
 
         if cursor.rowcount == 0:
