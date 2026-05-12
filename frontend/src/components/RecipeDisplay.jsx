@@ -31,11 +31,11 @@ const RecipeDisplay = ({ rid, name, description, favoriteCount }) => {
 
     return (
         <div className="recipe-card" onClick={routeTo}>
-            <button onClick={toggleFavorite}>Toggle favorite</button>
+            <button onClick={(e) => {e.stopPropagation(); toggleFavorite();}}>Toggle favorite</button>
             <h2 className="recipe-title">{name}</h2>
             <p className="recipe-description">{description}</p>
             {favoriteCount && (<p>Recipe favorite count: {favoriteCount}</p>) || <></>}
-            <button onClick={handleDelete}>Delete recipe (requires ownership)</button>
+            <button onClick={(e) => {e.stopPropagation(); handleDelete();}}>Delete recipe (requires ownership)</button>
         </div>
     )
 }

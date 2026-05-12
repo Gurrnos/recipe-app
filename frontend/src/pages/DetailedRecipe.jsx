@@ -14,8 +14,9 @@ const DetailedRecipe = () => {
         getRecipe();
     }, []);
 
+    const searchParams = new URLSearchParams(window.location.search);
     const url = window.location.href;
-    const v_rid = url.charAt(url.length - 1);  // Assuming the recipe ID is the last character in the URL
+    const v_rid = searchParams.get("rid");
 
     const getRecipe = async () => {
         try {

@@ -1,11 +1,17 @@
 import { Link, useMatch, useResolvedPath } from "react-router-dom"
 
 export default function Navbar() {
+
+  const LogOut = () => {
+    document.cookie ="token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  }
+
   return (
     <nav className="nav">
       <Link to="/" className="site-title">
         Site Name
       </Link>
+      <button onClick={LogOut}>Log out</button>
       <ul>
             <CustomLink to="/">Home</CustomLink>
             <CustomLink to="/Explore">Explore</CustomLink>

@@ -246,6 +246,8 @@ def get_detailed_recipe(response: Response, rid: int):
 
         result = cursor.fetchall()
 
+        print(result)
+
         formatted = recipe_formatter(result)
 
         response.status_code = status.HTTP_200_OK
@@ -287,7 +289,7 @@ def edit_recipe(
     data: CreateRecipe,
     response: Response,
     rid: int,
-    token: Annotated[str | None, Cookie()],
+    token: Annotated[str | None, Cookie()] = None,
 ):
     try:
         connection, cursor = get_connection()
@@ -329,7 +331,7 @@ def edit_recipe(
 
 
 @router.delete("/api/deleteRecipe/", status_code=200)
-def delete_recipe(response: Response, p_rid: int, token: Annotated[str | None, Cookie()]):
+def delete_recipe(response: Response, p_rid: int, token: Annotated[str | None, Cookie()] = None):
     try:
         connection, cursor = get_connection()
 

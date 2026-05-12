@@ -19,7 +19,7 @@ def close_connections(connection, cursor):
         cursor.close()
 
 @router.post("/api/users/toggleFavorite/", status_code=201)
-def add_fav(response: Response, p_rid: int, token: Annotated[str | None, Cookie()]):
+def add_fav(response: Response, p_rid: int, token: Annotated[str | None, Cookie()] = None):
     try:
         connection, cursor = get_connection()
 
