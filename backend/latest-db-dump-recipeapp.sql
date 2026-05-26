@@ -39,7 +39,7 @@ CREATE TABLE `favorites` (
 
 LOCK TABLES `favorites` WRITE;
 /*!40000 ALTER TABLE `favorites` DISABLE KEYS */;
-INSERT INTO `favorites` VALUES (3,3),(6,2),(6,3),(6,5),(17,2);
+INSERT INTO `favorites` VALUES (3,3),(6,2),(6,3),(6,5),(14,6),(14,9),(16,2),(16,7),(16,9),(16,17),(17,2),(17,5),(17,6),(17,8),(17,9),(17,17),(18,6),(18,10),(18,15),(19,2),(19,9),(19,10),(20,8),(20,9),(20,17),(22,3),(22,8),(22,9),(24,7),(24,8),(24,9),(24,15),(25,2),(25,6),(25,7);
 /*!40000 ALTER TABLE `favorites` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -59,7 +59,7 @@ CREATE TABLE `ingredients` (
   PRIMARY KEY (`iid`),
   KEY `rid` (`rid`),
   CONSTRAINT `ingredients_ibfk_1` FOREIGN KEY (`rid`) REFERENCES `recipes` (`rid`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,7 +68,7 @@ CREATE TABLE `ingredients` (
 
 LOCK TABLES `ingredients` WRITE;
 /*!40000 ALTER TABLE `ingredients` DISABLE KEYS */;
-INSERT INTO `ingredients` VALUES (3,'chicken','500g','meat',1),(3,'tomato','1/2','vegetable',2),(3,'rice','2 dl','rice',3),(5,'test','500g','test',4),(5,'tester','200g','tester',5),(2,'tomato','1/2','vegetable',6),(2,'rice','2 dl','rice',7),(6,'pork medallion','500g','meat',8),(6,'potato','2 whole','compliment',9),(6,'bbq sauce','200ml','sauce',10),(7,'test','500g','ing',11),(8,'Tortilla bread','2 whole','Bread',12),(8,'Chicken','500g','Meat',13),(8,'Taco sauce','1 spoon','Sauce',14),(8,'Shredded cheese','Enough','Cheese',15),(9,'Minced meat','500g','Meat',16),(9,'Carrot','1 whole','Vegetable',17),(9,'Yellow onion','1/3','Vegetable',18),(9,'Nicely cut tomato mess','1 package','Vegetable',19),(9,'Pasta of your choice','However much you want','Pasta',20),(10,'Chicken','2 files','Meat',21),(10,'Those small tomatoes','1 package','Vegetable',22),(10,'Roman salad','1 whole','Vegetable',23),(11,'Literally none','-','-',24);
+INSERT INTO `ingredients` VALUES (3,'chicken','500g','meat',1),(3,'tomato','1/2','vegetable',2),(3,'rice','2 dl','rice',3),(5,'test','500g','test',4),(5,'tester','200g','tester',5),(2,'tomato','1/2','vegetable',6),(2,'rice','2 dl','rice',7),(6,'pork medallion','500g','meat',8),(6,'potato','2 whole','compliment',9),(6,'bbq sauce','200ml','sauce',10),(7,'test','500g','ing',11),(8,'Tortilla bread','2 whole','Bread',12),(8,'Chicken','500g','Meat',13),(8,'Taco sauce','1 spoon','Sauce',14),(8,'Shredded cheese','Enough','Cheese',15),(9,'Minced meat','500g','Meat',16),(9,'Carrot','1 whole','Vegetable',17),(9,'Yellow onion','1/3','Vegetable',18),(9,'Nicely cut tomato mess','1 package','Vegetable',19),(9,'Pasta of your choice','However much you want','Pasta',20),(10,'Chicken','2 files','Meat',21),(10,'Those small tomatoes','1 package','Vegetable',22),(10,'Roman salad','1 whole','Vegetable',23),(11,'Literally none','-','-',24),(15,'hashmap','2','unspecified',28),(15,'priority queue','1','unspecified',29),(16,'secret','secret','secret',30),(17,'Hamburger meat','1','meat',31),(17,'Salad','1 leaf','Vegetable',32),(17,'Tomato','1 slice','Vegetable',33),(17,'Cucumber','3 slices','Vegetable',34),(17,'Burger cheese','1 slice','Cheese',35),(17,'Bun','1','Bread',36),(18,'helloworld','helloworld','helloworld',37);
 /*!40000 ALTER TABLE `ingredients` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -89,7 +89,7 @@ CREATE TABLE `recipes` (
   PRIMARY KEY (`rid`),
   KEY `uid` (`uid`),
   CONSTRAINT `recipes_ibfk_1` FOREIGN KEY (`uid`) REFERENCES `users` (`uid`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,7 +98,7 @@ CREATE TABLE `recipes` (
 
 LOCK TABLES `recipes` WRITE;
 /*!40000 ALTER TABLE `recipes` DISABLE KEYS */;
-INSERT INTO `recipes` VALUES (2,'chicken recipe','tasty chicken',1,3,'2026-03-08'),(3,'chicken recipe','tasty chicken',1,3,NULL),(5,'a testy recipe','a very testing recipe',1,3,NULL),(6,'pork medallions','tasty pork medallions',1,6,NULL),(7,'testrescp','test',1,6,NULL),(8,'Chicken quesedilas','Tasty chicken quesedilas with taco sause',1,17,NULL),(9,'Pasta bolognese','Delicious pasta bolognes for you',1,17,NULL),(10,'Cesar salad','A fresh cesar salad with the bare minimum ingredients',1,16,NULL),(11,'The bare minimum','Feeling lazy? This for you',0,16,NULL);
+INSERT INTO `recipes` VALUES (2,'chicken recipe','tasty chicken',1,3,'2026-03-08'),(3,'chicken recipe','tasty chicken',1,3,NULL),(5,'a testy recipe','a very testing recipe',1,3,NULL),(6,'pork medallions','tasty pork medallions',1,6,NULL),(7,'testrescp','test',1,6,NULL),(8,'Chicken quesedilas','Tasty chicken quesedilas with taco sause',1,17,NULL),(9,'Pasta bolognese','Delicious pasta bolognes for you',1,17,NULL),(10,'Cesar salad','A fresh cesar salad with the bare minimum ingredients',1,16,NULL),(11,'The bare minimum','Feeling lazy? This for you',0,16,NULL),(15,'dijkstras special','Dijkstras special that will fry your brain',1,23,NULL),(16,'grandmas secret recipe','grandmas special recipe',0,23,NULL),(17,'hamburgir','tasty \"homemade\" hamburger',1,24,NULL),(18,'helloworld','helloworld',1,22,NULL);
 /*!40000 ALTER TABLE `recipes` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -161,7 +161,7 @@ CREATE TABLE `steps` (
 
 LOCK TABLES `steps` WRITE;
 /*!40000 ALTER TABLE `steps` DISABLE KEYS */;
-INSERT INTO `steps` VALUES (2,1,'cut vegetables'),(2,2,'cook chicken'),(2,3,'DO NOT EAT'),(3,1,'cook rice'),(3,2,'cut vegetables'),(3,3,'cook chicken'),(5,1,'cook test'),(5,2,'cook tester'),(6,1,'cook pork medallion'),(6,2,'put potato in oven 30 minutes'),(6,3,'pour sauce on that meat'),(7,1,'cook test'),(7,2,'burn test'),(8,1,'Cook chicken'),(8,2,'Cut chicken into pieces'),(8,3,'Put chicken on tortilla bread, add taco sauce and cheese'),(8,4,'Fold tortilla and put on pan'),(9,1,'Cut onion and carrot'),(9,2,'Cook onion and carrot in saucepan'),(9,3,'Add minced meat and the cut tomato mess'),(9,4,'Let cook for a long time'),(9,5,'Boil pasta'),(10,1,'Cook chicken'),(10,2,'Cut chicken'),(10,3,'Cut tomatoes'),(10,4,'Tear up salad'),(10,5,'Mix into bowl, serve'),(11,1,'Call pizza store'),(11,2,'Order pizza delivery'),(11,3,'Relax');
+INSERT INTO `steps` VALUES (2,1,'cut vegetables'),(2,2,'cook chicken'),(2,3,'DO NOT EAT'),(3,1,'cook rice'),(3,2,'cut vegetables'),(3,3,'cook chicken'),(5,1,'cook test'),(5,2,'cook tester'),(6,1,'cook pork medallion'),(6,2,'put potato in oven 30 minutes'),(6,3,'pour sauce on that meat'),(7,1,'cook test'),(7,2,'burn test'),(8,1,'Cook chicken'),(8,2,'Cut chicken into pieces'),(8,3,'Put chicken on tortilla bread, add taco sauce and cheese'),(8,4,'Fold tortilla and put on pan'),(9,1,'Cut onion and carrot'),(9,2,'Cook onion and carrot in saucepan'),(9,3,'Add minced meat and the cut tomato mess'),(9,4,'Let cook for a long time'),(9,5,'Boil pasta'),(10,1,'Cook chicken'),(10,2,'Cut chicken'),(10,3,'Cut tomatoes'),(10,4,'Tear up salad'),(10,5,'Mix into bowl, serve'),(11,1,'Call pizza store'),(11,2,'Order pizza delivery'),(11,3,'Relax'),(15,1,'Create a hashmap of visited nodes'),(15,2,'create a hashmap of parent values'),(15,3,'Add some edges and choose shortest path'),(16,1,'secret'),(17,1,'Cut vegetables into the specified thingy'),(17,2,'Cook the meat'),(17,3,'Add cheese when meat almost done, and continue cooking to let the cheese melt'),(17,4,'build your burger'),(18,1,'helloworld');
 /*!40000 ALTER TABLE `steps` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,7 +179,7 @@ CREATE TABLE `users` (
   `password` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -188,7 +188,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (3,'test','test@email.com','$2b$12$y1Hgt4g9rEFNY/N7d4C0xehjBd6znoCBckP7.OVIXs6pYRzGBmzyu'),(6,'username','username@email.com','$2b$12$423i5.lp2ycwemLW1OLYCOLWmRN02u6jBZALvAcQXTcpHeX4T17uC'),(8,'tester','tester@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(10,'tester','testing@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(14,'Gurrnos','Gurrnos@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.mv.0M7Hn.3rgtJGjLfJlbrXx0uJMrf6'),(15,'Zadikiel','Zadikiel@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.7VuZwGW00GEp6AXimIOM6fx4PQimrX.'),(16,'Warp','Warp@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H..0d7OcXzLSNFHoS9U7wu.8M7FQaQgly'),(17,'Hadal','Hadal@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.fQeQu.RVGnlz3C0ut02b9ZsxvFUcxVm'),(18,'KockenAnna','KockenAnna@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.k0TJQnR9dSYefoQxBDKGLZVgltmoeLi'),(19,'GordanRamsay','GordanRamsay@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.e/DCtCIyZ1f6zAhsn0a6lWgDhEOTFX.'),(20,'CookingAddict','CookingAddict@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.NBvn1WnFoIfT3h8J3RtvgwHv.m9uCqq');
+INSERT INTO `users` VALUES (3,'test','test@email.com','$2b$12$y1Hgt4g9rEFNY/N7d4C0xehjBd6znoCBckP7.OVIXs6pYRzGBmzyu'),(6,'username','username@email.com','$2b$12$423i5.lp2ycwemLW1OLYCOLWmRN02u6jBZALvAcQXTcpHeX4T17uC'),(8,'tester','tester@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(10,'tester','testing@email.com','$2b$12$PjSvsrHN1t1ovmfF6DyBn.SRvAdKLFCZW4J/igkAm/RKczBhh9REi'),(14,'Gurrnos','Gurrnos@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.mv.0M7Hn.3rgtJGjLfJlbrXx0uJMrf6'),(15,'Zadikiel','Zadikiel@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.7VuZwGW00GEp6AXimIOM6fx4PQimrX.'),(16,'Warp','Warp@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H..0d7OcXzLSNFHoS9U7wu.8M7FQaQgly'),(17,'Hadal','Hadal@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.fQeQu.RVGnlz3C0ut02b9ZsxvFUcxVm'),(18,'KockenAnna','KockenAnna@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.k0TJQnR9dSYefoQxBDKGLZVgltmoeLi'),(19,'GordanRamsay','GordanRamsay@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.e/DCtCIyZ1f6zAhsn0a6lWgDhEOTFX.'),(20,'CookingAddict','CookingAddict@email.com','$2b$12$XY/GSpcOOy7Vo38uIA9.H.NBvn1WnFoIfT3h8J3RtvgwHv.m9uCqq'),(22,'helloworld','helloworld@email.com','$2b$12$fzlhDJsY0ibFsyu9.ClLaua1INqhmr9SHSkVtH/UIviVxcjpzggLq'),(23,'dijkstra','dijkstra@email.com','$2b$12$4yNgYjEvrEDAU1UxLTmQnOPZEmbJC/8X8OUrJdhldfQjOCEr/wmJ6'),(24,'gurrdogl','gurrdogl@gmail.com','$2b$12$aMPDCTio.DZ9G8Q5M7uWAemHgF.AE5zQe.yHs0re53MX/aupqrnEy'),(25,'myacc','myacc@email.com','$2b$12$aMPDCTio.DZ9G8Q5M7uWAe.xfAlTwYOzmiqbhowaP15gqaOVohFvi');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;
@@ -258,4 +258,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-05-12 15:55:48
+-- Dump completed on 2026-05-26 19:31:06

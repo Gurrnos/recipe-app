@@ -124,7 +124,7 @@ def get_recipes(
         values = []
 
         if len(data.ingredients) < 1 and data.exclude_own is False:
-            statement = """SELECT rid, recipename, description, uid FROM recipes WHERE recipename LIKE %s"""
+            statement = """SELECT rid, recipename, description, uid FROM recipes WHERE recipename LIKE %s AND isPublic = 1"""
             values = [f"%{data.recipename}%"]
 
         elif len(data.ingredients) < 1 and data.exclude_own is True:
@@ -136,7 +136,7 @@ def get_recipes(
 
             uid = user["uid"]
 
-            statement = """SELECT rid, recipename, description, uid FROM recipes WHERE uid != %s AND recipename LIKE %s"""
+            statement = """SELECT rid, recipename, description, uid FROM recipes WHERE uid != %s AND recipename LIKE %s AND isPublic = 1"""
             values = [uid, f"%{data.recipename}%"]
 
         elif len(data.ingredients) > 0 and data.exclude_own is False:
@@ -149,7 +149,7 @@ def get_recipes(
             rids = ", ".join(["%s"] * len(param_data))
 
             statement = f"""SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids})
-            AND recipename LIKE %s
+            AND recipename LIKE %s AND isPublic = 1
             """
             param_data.append(f"%{data.recipename}%")
             values = param_data
@@ -174,7 +174,7 @@ def get_recipes(
             rids = ", ".join(["%s"] * len(param_data))
 
             statement = f"""SELECT rid, recipename, description, uid FROM recipes WHERE rid IN ({rids}) 
-            AND uid != %s AND recipename LIKE %s
+            AND uid != %s AND recipename LIKE %s AND isPublic = 1
             """
             param_data.append(uid)
             param_data.append(f"%{data.recipename}%")
